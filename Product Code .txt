@@ -1,0 +1,52 @@
+// Product Insert Statement
+INSERT INTO Products (Name, Description, Price, CategoryID, ModelURL, ThumbnailURL, Quantity)
+VALUES 
+('sofa1', 'Wood Velvet 2 seater Sofa for Living Room', 15000, 1,
+ 'https://shop3dprojectaccount.blob.core.windows.net/3d-models/Sofa1.glb',
+	'https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png', 20)
+
+---------------------------------------------------------
+
+// repository .cs
+ #region GetProductById - Returns a product by ID
+public Product GetProductById(int productId)
+{
+    Product product = null;
+    try
+    {
+        product = context.Products.Find(productId);
+        if (product != null)
+        {
+            // Get product images
+            product.ProductImages = context.ProductImages
+                .Where(img => img.ProductId == productId)
+                .ToList();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    return product;
+}
+#endregion
+
+
+-----------------------------------------
+
+//ProductController.cs
+[HttpGet]
+public JsonResult GetProductById(int id)
+{
+    Product product = null;
+    try
+    {
+        product = repository.GetProductById(id);
+    }
+    catch (Exception ex)
+    {
+        product = null;
+    }
+    return Json(product);
+}
+
