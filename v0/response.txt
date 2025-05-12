@@ -1,0 +1,141 @@
+## Additional Setup Required
+
+To make this component work properly, you'll need to add the following to your Angular project:
+
+### 1. Install the model-viewer Web Component
+
+Add the Google model-viewer component to your project:
+
+```shellscript
+npm install @google/model-viewer
+```
+
+### 2. Add model-viewer to your Angular Module
+
+In your `app.module.ts` file, add the following:
+
+```typescript
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { ProductDetailComponent } from './components/product-detail/product-detail.component';
+
+// Import for model-viewer
+import '@google/model-viewer';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    ProductDetailComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA] // Required for model-viewer
+})
+export class AppModule { }
+```
+
+### 3. Add Bootstrap and Bootstrap Icons
+
+Make sure you have Bootstrap and Bootstrap Icons installed:
+
+```shellscript
+npm install bootstrap bootstrap-icons
+```
+
+Then add them to your `angular.json` file:
+
+```json
+"styles": [
+  "node_modules/bootstrap/dist/css/bootstrap.min.css",
+  "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+  "src/styles.css"
+],
+"scripts": [
+  "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+]
+```
+
+### 4. Add a Route for the Product Detail Page
+
+In your `app-routing.module.ts`:
+
+```typescript
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { ProductDetailComponent } from './components/product-detail/product-detail.component';
+
+const routes: Routes = [
+  { path: 'product/:id', component: ProductDetailComponent },
+  // Other routes...
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+## Features Implemented
+
+1. **Product Information Display**:
+
+1. Product name, description, price, and availability
+2. Category and product ID information
+3. Detailed specifications in a tabbed interface
+
+
+
+2. **Image Gallery**:
+
+1. Main product image with thumbnails
+2. Ability to switch between images
+3. Responsive design for different screen sizes
+
+
+
+3. **3D Model Viewer**:
+
+1. Integration with Google's `<model-viewer>` component
+2. Loading state management for 3D models
+3. Controls for rotating and zooming the 3D model
+4. Fallback to regular images if 3D model is not available
+
+
+
+4. **User Interaction**:
+
+1. Quantity selector
+2. Add to cart and wishlist buttons
+3. Product tabs for additional information
+4. Related products section
+
+
+
+5. **Responsive Design**:
+
+1. Mobile-friendly layout
+2. Adaptive image and content sizing
+3. Bootstrap grid system for layout
+
+
+
+6. **Error Handling**:
+
+1. Loading states for product data and 3D model
+2. Error messages for failed data fetching
+3. Fallback content when data is unavailable
+
+
+
+
+
+This implementation provides a complete, modern e-commerce product details page that integrates with your ASP.NET Core backend and displays 3D models from Azure storage.
