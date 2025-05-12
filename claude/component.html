@@ -1,0 +1,86 @@
+<!-- Product Details Container -->
+<div class="container product-detail-container" *ngIf="product">
+  <div class="row">
+    <!-- Image Gallery -->
+    <div class="col-md-6 product-gallery">
+      <!-- Main Image Display -->
+      <div class="main-image-container">
+        <img [src]="selectedImage" class="img-fluid main-product-image" alt="{{ product.name }}">
+      </div>
+
+      <!-- Thumbnail Gallery -->
+      <div class="thumbnail-gallery mt-3">
+        <!-- Product Images -->
+        <div *ngFor="let image of product.productImages" 
+             class="thumbnail-item" 
+             (click)="selectImage(image.imageUrl)">
+          <img [src]="image.imageUrl" class="img-thumbnail" alt="Product Thumbnail">
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Information -->
+    <div class="col-md-6 product-info">
+      <h1 class="product-title">{{ product.name }}</h1>
+      
+      <!-- Price and Availability -->
+      <div class="product-price-section">
+        <h2 class="product-price">₹{{ product.price | number:'1.2-2' }}</h2>
+        <p class="product-availability" 
+           [ngClass]="{'text-success': product.quantity > 0, 'text-danger': product.quantity === 0}">
+          {{ product.quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+        </p>
+      </div>
+
+      <!-- Product Description -->
+      <div class="product-description mt-3">
+        <h3>Description</h3>
+        <p>{{ product.description }}</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="product-actions mt-4">
+        <button class="btn btn-primary btn-lg me-3" 
+                (click)="addToCart()" 
+                [disabled]="product.quantity === 0">
+          <i class="fas fa-shopping-cart"></i> Add to Cart
+        </button>
+        <button class="btn btn-success btn-lg" 
+                (click)="buyNow()" 
+                [disabled]="product.quantity === 0">
+          <i class="fas fa-bolt"></i> Buy Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Model Viewer Section -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <h3>3D Product Visualization</h3>
+      <!-- Google model-viewer for 3D model interaction -->
+      <model-viewer 
+        *ngIf="modelViewerUrl"
+        [src]="modelViewerUrl"
+        alt="{{ product.name }} 3D Model"
+        auto-rotate 
+        camera-controls 
+        ar 
+        ar-modes="webxr scene-viewer quick-look"
+        class="3d-model-viewer">
+      </model-viewer>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Spinner -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<!-- Error Handling -->
+<div *ngIf="!product && !isLoading" class="error-container">
+  <p class="text-danger">Unable to load product details. Please try again later.</p>
+</div>
