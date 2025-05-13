@@ -1,1 +1,236 @@
 
+<div class="container product-detail-container mt-4">
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading product details...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMsg && !loading" class="alert alert-danger" role="alert">
+    {{ errorMsg }}
+  </div>
+
+  <!-- Product details content -->
+  <div *ngIf="product && !loading" class="row">
+    <!-- Left column: Images and 3D model -->
+    <div class="col-lg-7 mb-4">
+      <!-- Image gallery -->
+      <div class="product-images mb-4">
+        <div class="main-image-container">
+          <!-- Main product image -->
+          <div *ngIf="productImages && productImages.length > 0" class="main-image">
+            <img 
+              [src]="productImages[currentImageIndex]?.imageUrl || product.thumbnailUrl" 
+              alt="{{ product.name }}" 
+              class="img-fluid rounded shadow"
+              (load)="imageLoading = false"
+              [ngClass]="{'d-none': imageLoading}"
+            >
+            <div *ngIf="imageLoading" class="image-loading-placeholder d-flex align-items-center justify-content-center">
+              <div class="spinner-border text-secondary" role="status">
+                <span class="visually-hidden">Loading image...</span>
+              </div>
+            </div>
+            
+            <!-- Image navigation arrows -->
+            <button *ngIf="productImages.length > 1" class="image-nav prev-image" (click)="prevImage()">
+              <i class="fa fa-chevron-left"></i>
+            </button>
+            <button *ngIf="productImages.length > 1" class="image-nav next-image" (click)="nextImage()">
+              <i class="fa fa-chevron-right"></i>
+            </button>
+          </div>
+          
+          <!-- Fallback if no images -->
+          <div *ngIf="(!productImages || productImages.length === 0) && product.thumbnailUrl" class="main-image">
+            <img 
+              [src]="product.thumbnailUrl" 
+              alt="{{ product.name }}" 
+              class="img-fluid rounded shadow"
+              (load)="imageLoading = false"
+              [ngClass]="{'d-none': imageLoading}"
+            >
+            <div *ngIf="imageLoading" class="image-loading-placeholder d-flex align-items-center justify-content-center">
+              <div class="spinner-border text-secondary" role="status">
+                <span class="visually-hidden">Loading image...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Thumbnail gallery -->
+        <div *ngIf="productImages && productImages.length > 1" class="thumbnail-gallery mt-3">
+          <div class="row g-2">
+            <div *ngFor="let image of productImages; let i = index" class="col-3 col-md-2">
+              <div 
+                class="thumbnail" 
+                [ngClass]="{'active': i === currentImageIndex}"
+                (click)="showImage(i)"
+              >
+                <img [src]="image.imageUrl" alt="Thumbnail {{ i + 1 }}" class="img-fluid rounded">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 3D Model Viewer -->
+      <div class="model-viewer-container mt-4">
+        <h4 class="mb-3">3D Model View</h4>
+        <div class="model-viewer-wrapper">
+          <!-- Loading indicator for 3D model -->
+          <div *ngIf="modelLoading" class="model-loading-overlay d-flex align-items-center justify-content-center">
+            <div>
+              <div class="spinner-border text-primary mb-2" role="status">
+                <span class="visually-hidden">Loading 3D model...</span>
+              </div>
+              <p class="text-center text-white">Loading 3D model...</p>
+            </div>
+          </div>
+          
+          <!-- Google's model-viewer component -->
+          <model-viewer 
+            *ngIf="product.modelUrl"
+            [src]="product.modelUrl"
+            alt="3D model of {{ product.name }}"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            shadow-intensity="1"
+            auto-rotate
+            (load)="onModelLoad()"
+            (error)="onModelError()"
+          >
+            <button slot="ar-button" class="ar-button">
+              View in your space
+            </button>
+            <div class="progress-bar hide" slot="progress-bar">
+              <div class="update-bar"></div>
+            </div>
+          </model-viewer>
+        </div>
+        <div class="model-controls mt-2">
+          <p class="text-muted small">Drag to rotate. Scroll to zoom.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right column: Product information -->
+    <div class="col-lg-5">
+      <div class="product-info p-4 bg-white rounded shadow-sm">
+        <!-- Product header -->
+        <div class="product-header mb-4">
+          <h1 class="product-title">{{ product.name }}</h1>
+          <div class="product-price mt-2">
+            <span class="price">₹{{ product.price.toLocaleString() }}</span>
+            <span *ngIf="product.quantity <= 5 && product.quantity > 0" class="badge bg-warning ms-2">Low Stock</span>
+            <span *ngIf="product.quantity === 0" class="badge bg-danger ms-2">Out of Stock</span>
+          </div>
+        </div>
+        
+        <!-- Product description -->
+        <div class="product-description mb-4">
+          <h4>Description</h4>
+          <p>{{ product.description }}</p>
+        </div>
+        
+        <!-- Product specifications -->
+        <div class="product-specs mb-4">
+          <h4>Specifications</h4>
+          <table class="table table-sm">
+            <tbody>
+              <tr>
+                <th scope="row">Category</th>
+                <td>{{ product.categoryId }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Product ID</th>
+                <td>{{ product.productId }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Availability</th>
+                <td>
+                  <span *ngIf="product.quantity > 0" class="text-success">
+                    In Stock ({{ product.quantity }} available)
+                  </span>
+                  <span *ngIf="product.quantity === 0" class="text-danger">
+                    Out of Stock
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Quantity selector and Add to cart button -->
+        <div class="product-actions">
+          <div class="row g-3 align-items-center mb-4">
+            <div class="col-md-4">
+              <label for="quantity" class="form-label">Quantity</label>
+              <select class="form-select" id="quantity" [disabled]="product.quantity === 0">
+                <option *ngFor="let i of [].constructor(Math.min(product.quantity, 10)); let idx = index" [value]="idx + 1">
+                  {{ idx + 1 }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <button 
+                class="btn btn-primary w-100 add-to-cart-btn" 
+                [disabled]="product.quantity === 0"
+                (click)="addToCart()"
+              >
+                <i class="fa fa-shopping-cart me-2"></i>
+                Add to Cart
+              </button>
+            </div>
+          </div>
+          
+          <!-- Additional action buttons -->
+          <div class="row g-2">
+            <div class="col-6">
+              <button class="btn btn-outline-secondary w-100">
+                <i class="fa fa-heart-o me-2"></i>
+                Add to Wishlist
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-secondary w-100">
+                <i class="fa fa-share-alt me-2"></i>
+                Share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Delivery information -->
+      <div class="delivery-info mt-4 p-4 bg-white rounded shadow-sm">
+        <h4 class="mb-3">Delivery Information</h4>
+        <div class="d-flex align-items-center mb-3">
+          <i class="fa fa-truck text-primary me-3 fa-2x"></i>
+          <div>
+            <h5 class="mb-1">Free Shipping</h5>
+            <p class="mb-0 text-muted">Delivery within 3-5 business days</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mb-3">
+          <i class="fa fa-exchange text-primary me-3 fa-2x"></i>
+          <div>
+            <h5 class="mb-1">Easy Returns</h5>
+            <p class="mb-0 text-muted">30 days return policy</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <i class="fa fa-shield text-primary me-3 fa-2x"></i>
+          <div>
+            <h5 class="mb-1">Warranty</h5>
+            <p class="mb-0 text-muted">1 year manufacturer warranty</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
