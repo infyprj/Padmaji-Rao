@@ -1,21 +1,14 @@
-Build at: 2025-05-13T15:51:06.579Z - Hash: 9a4c24b413975adb - Time: 33813ms
+For this url :http://localhost:4200/product/1 I got null in the console in this code :
+ngOnInit(): void {
+  console.log("In ngOnit");
+  console.log(this.route.snapshot.paramMap.get('id'));
 
-Error: src/app/services/product-service/product.service.ts:14:23 - error NG2003: No suitable injection token for parameter 'http' of class 'ProductService'.
-  Consider changing the type-only import to a regular import, or use the @Inject decorator to specify an injection token.
-
-14   constructor(private http: HttpClient) { }
-                         ~~~~
-
-  src/app/services/product-service/product.service.ts:14:29
-    14   constructor(private http: HttpClient) { }
-                                   ~~~~~~~~~~
-    This type is imported using a type-only import, which prevents it from being usable as an injection token.
-  src/app/services/product-service/product.service.ts:2:8
-    2 import type { HttpClient, HttpErrorResponse } from "@angular/common/http"
-             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    The type-only import occurs here.
+//app.routing.ts
+import { RouterModule } from '@angular/router';
+import { ProductDetailComponent } from './product-detail/product-detail.component';
 
 
-
-
-** Angular Live Development Server is listening on localhost:4200, open your browser on http://localhost:4200/ **
+export var routing = RouterModule.forRoot([
+  { path: 'product/:id', component: ProductDetailComponent }
+  
+])
