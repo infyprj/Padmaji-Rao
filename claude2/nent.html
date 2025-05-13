@@ -1,0 +1,267 @@
+<div class="container product-detail-container">
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorMsg" class="error-message">
+    <div class="alert alert-danger" role="alert">
+      {{ errorMsg }}
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !errorMsg && product" class="row">
+    <!-- Product Images Section -->
+    <div class="col-md-6">
+      <div class="product-images">
+        <img [src]="activeImageUrl" class="main-image img-fluid" alt="{{ product.name }}">
+        
+        <div class="thumbnail-container">
+          <!-- Main product thumbnail -->
+          <img [src]="product.thumbnailUrl" 
+               class="thumbnail" 
+               [class.active]="activeImageUrl === product.thumbnailUrl"
+               (click)="setActiveImage(product.thumbnailUrl)" 
+               alt="{{ product.name }} thumbnail">
+          
+          <!-- Additional product images -->
+          <div *ngFor="let image of productImages">
+            <img [src]="image.imageUrl" 
+                 class="thumbnail" 
+                 [class.active]="activeImageUrl === image.imageUrl"
+                 (click)="setActiveImage(image.imageUrl)" 
+                 alt="{{ product.name }} image">
+          </div>
+        </div>
+
+        <!-- Placeholder for future 3D model viewer -->
+        <!-- <div class="model-viewer-placeholder">
+          <p>3D model viewer will be displayed here</p>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Product Details Section -->
+    <div class="col-md-6">
+      <div class="product-detail-card card p-4">
+        <h1 class="product-title">{{ product.name }}</h1>
+        <div class="product-price">₹{{ product.price.toLocaleString() }}</div>
+        
+        <div class="product-description">
+          <p>{{ product.description }}</p>
+        </div>
+        
+        <div class="product-meta">
+          <p><strong>Availability:</strong> <span class="text-success" *ngIf="product.quantity > 0">In Stock ({{ product.quantity }} available)</span>
+            <span class="text-danger" *ngIf="product.quantity <= 0">Out of Stock</span></p>
+          <p><strong>Category ID:</strong> {{ product.categoryId }}</p>
+          <p><strong>Product ID:</strong> {{ product.productId }}</p>
+        </div>
+        
+        <div class="quantity-control" *ngIf="product.quantity > 0">
+          <button class="btn" (click)="decrementQuantity()">
+            <i class="fa fa-minus"></i>
+          </button>
+          <input type="text" [value]="quantity" readonly>
+          <button class="btn" (click)="incrementQuantity()">
+            <i class="fa fa-plus"></i>
+          </button>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-add-to-cart" 
+                  [disabled]="product.quantity <= 0"
+                  (click)="addToCart()">
+            <i class="fa fa-shopping-cart"></i> Add to Cart
+          </button>
+          <button class="btn btn-buy-now" 
+                  [disabled]="product.quantity <= 0">
+            <i class="fa fa-bolt"></i> Buy Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Details Tabs Section -->
+  <div *ngIf="!loading && !errorMsg && product" class="row mt-5">
+    <div class="col-12">
+      <ul class="nav nav-tabs" id="productDetailTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">
+            Description
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab" aria-controls="specifications" aria-selected="false">
+            Specifications
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">
+            Reviews
+          </button>
+        </li>
+      </ul>
+      
+      <div class="tab-content p-4 border border-top-0 rounded-bottom" id="productDetailTabsContent">
+        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+          <h4>Product Description</h4>
+          <p>{{ product.description }}</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sodales, odio vel tempus fermentum, arcu magna venenatis orci, in vehicula mi nisi eget tortor. Nulla facilisi. Etiam tincidunt nulla in justo consectetur, a fermentum nisi tempus.</p>
+        </div>
+        
+        <div class="tab-pane fade" id="specifications" role="tabpanel" aria-labelledby="specifications-tab">
+          <h4>Product Specifications</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <tbody>
+                <tr>
+                  <th scope="row">Dimensions</th>
+                  <td>32 x 64 x 84 cm</td>
+                </tr>
+                <tr>
+                  <th scope="row">Material</th>
+                  <td>Wood, Velvet</td>
+                </tr>
+                <tr>
+                  <th scope="row">Weight</th>
+                  <td>24 kg</td>
+                </tr>
+                <tr>
+                  <th scope="row">Color</th>
+                  <td>Multiple options available</td>
+                </tr>
+                <tr>
+                  <th scope="row">Assembly Required</th>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">Warranty</th>
+                  <td>2 Years</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+          <h4>Customer Reviews</h4>
+          <div class="d-flex mb-4">
+            <div class="me-3">
+              <strong>4.8</strong>
+              <div>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star-half-o text-warning"></i>
+              </div>
+              <small>Based on 24 reviews</small>
+            </div>
+          </div>
+          
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex mb-3">
+                <div>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                </div>
+                <div class="ms-auto">
+                  <small class="text-muted">Posted 2 months ago</small>
+                </div>
+              </div>
+              <h5>Excellent quality and comfort</h5>
+              <p>The sofa is beautiful and extremely comfortable. The velvet fabric feels premium and the wood frame is solid. Very satisfied with this purchase.</p>
+              <div class="d-flex">
+                <strong>John D.</strong>
+                <div class="ms-auto">
+                  <span class="badge bg-success">Verified Purchase</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex mb-3">
+                <div>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star text-warning"></i>
+                  <i class="fa fa-star-o text-warning"></i>
+                </div>
+                <div class="ms-auto">
+                  <small class="text-muted">Posted 1 month ago</small>
+                </div>
+              </div>
+              <h5>Great sofa, but delivery was delayed</h5>
+              <p>The sofa itself is fantastic, but had to wait an extra week for delivery. Otherwise, very happy with the product.</p>
+              <div class="d-flex">
+                <strong>Emma S.</strong>
+                <div class="ms-auto">
+                  <span class="badge bg-success">Verified Purchase</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products Section -->
+  <div *ngIf="!loading && !errorMsg && product" class="row mt-5">
+    <div class="col-12">
+      <h3 class="mb-4">Related Products</h3>
+      <div class="row">
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <img src="https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png" class="card-img-top" alt="Related Product">
+            <div class="card-body">
+              <h5 class="card-title">Similar Wood Sofa</h5>
+              <p class="card-text">₹14,500</p>
+              <button class="btn btn-sm btn-outline-primary">View Details</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <img src="https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png" class="card-img-top" alt="Related Product">
+            <div class="card-body">
+              <h5 class="card-title">Leather Sofa</h5>
+              <p class="card-text">₹18,000</p>
+              <button class="btn btn-sm btn-outline-primary">View Details</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <img src="https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png" class="card-img-top" alt="Related Product">
+            <div class="card-body">
+              <h5 class="card-title">3-Seater Sofa</h5>
+              <p class="card-text">₹20,000</p>
+              <button class="btn btn-sm btn-outline-primary">View Details</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="card h-100">
+            <img src="https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png" class="card-img-top" alt="Related Product">
+            <div class="card-body">
+              <h5 class="card-title">Modern Sofa</h5>
+              <p class="card-text">₹16,500</p>
+              <button class="btn btn-sm btn-outline-primary">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
