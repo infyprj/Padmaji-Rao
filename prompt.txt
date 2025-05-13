@@ -1,1 +1,309 @@
-Develop an Angular-based product details web page for an e-commerce application. The page should display detailed information for a selected product, including images, a 3D model, and other relevant fields commonly found in modern e-commerce websites. The backend is built using ASP.NET Core, and the frontend is initialized within the same project using angular. The design should be user-friendly and visually appealing, adhering to industry best practices. Utilize HTML, CSS, Bootstrap, and Angular for the implementation. The page should be responsive and provide a seamless experience across various devices. The product details will be fetched from the ASP.NET Core backend. The design should be modern and intuitive, focusing on clear presentation of product information and ease of navigation. Consider incorporating interactive elements to enhance user engagement. Maintain the loading mechanism for the images mainly for 3d model, because the 3d model need to be fetched from the azure storage services. The page should be optimized for performance, ensuring fast loading times and smooth interactions. The structure should be well-organized and maintainable, following Angular best practices for component design and data management. The styling should be consistent and visually appealing, using Bootstrap for a responsive layout and CSS for custom styling. The 3D model should be integrated in a way that allows users to interact with it, such as rotating or zooming, use the google's component <model-viewer> for the 3d model zooming and rotating. The page should also include common e-commerce features like product descriptions, specifications, pricing, and call-to-action buttons. Maintain the angular component structure : product-detail.component.ts product-detail.component.html product-detail.component.css
+Develop an Angular-based product details web page for an e-commerce application. 
+The page should display detailed information for a selected product, including images, a 3D model, and other relevant fields commonly found in modern e-commerce websites. 
+The backend is built using ASP.NET Core, and the frontend is initialized within the same project using angular. 
+The design should be user-friendly and visually appealing, adhering to industry best practices. Utilize HTML, CSS, Bootstrap, and Angular for the implementation. 
+The page should be responsive and provide a seamless experience across various devices. 
+The product details will be fetched from the ASP.NET Core backend. The design should be modern and intuitive, focusing on clear presentation of product information and ease of navigation. 
+Consider incorporating interactive elements to enhance user engagement. 
+Maintain the loading mechanism for the images mainly for 3d model, because the 3d model need to be fetched from the azure storage services. The page should be optimized for performance, ensuring fast loading times and smooth interactions. 
+The structure should be well-organized and maintainable, following Angular best practices for component design and data management. The styling should be consistent and visually appealing, using Bootstrap for a responsive layout and CSS for custom styling. The 3D model should be integrated in a way that allows users to interact with it, such as rotating or zooming, use the google's javascript embedded code  <model-viewer> for the 3d model zooming and rotating. The page should also include common e-commerce features like product descriptions, specifications, pricing, and call-to-action buttons. Maintain the angular component structure : product-detail.component.ts product-detail.component.html product-detail.component.css.
+The following data I have created already in different files	:
+Request URL
+https://localhost:7195/api/Product/GetProductById?id=1
+Response body
+{
+  "productId": 1,
+  "name": "sofa1",
+  "description": "Wood Velvet 2 seater Sofa for Living Room",
+  "price": 15000,
+  "categoryId": 1,
+  "modelUrl": "https://shop3dprojectaccount.blob.core.windows.net/3d-models/Sofa1.glb",
+  "thumbnailUrl": "https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png",
+  "quantity": 20
+}
+
+
+
+Request URL
+https://localhost:7195/api/Product/GetProductImages?productId=1
+Response body
+[
+  {
+    "imageId": 1,
+    "productId": 1,
+    "imageUrl": "https://example.com/images/product1_img1.jpg"
+  },
+  {
+    "imageId": 2,
+    "productId": 1,
+    "imageUrl": "https://example.com/images/product1_img2.jpg"
+  }
+]
+
+
+//interfaces/product.ts
+export interface IProduct {
+  productId: number
+  name: string
+  description: string
+  price: number
+  categoryId: number
+  modelUrl: string
+  thumbnailUrl: string
+  quantity: number
+}
+
+
+//services/product-service.ts
+import { Injectable } from "@angular/core"
+import type { HttpClient, HttpErrorResponse } from "@angular/common/http"
+import { throwError, type Observable, catchError } from "rxjs"
+import { IProduct } from "../../interfaces/product"
+//import type { Product } from "../models/product.model"
+//import { environment } from "../../environments/environment"
+
+@Injectable({
+  providedIn: "root",
+})
+export class ProductService {
+  //private apiUrl = `${environment.apiUrl}/api/product`
+
+  constructor(private http: HttpClient) { }
+
+  getProducts(): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>('http://localhost:7195/api/Product/GetAllProducts').pipe(catchError(this.errorHandler));
+  }
+
+  getProductById(id: number): Observable<IProduct> {
+    return this.http.get<IProduct>(`http://localhost:7195/api/Product/GetProductById?id=${id}`).pipe(catchError(this.errorHandler));
+  }
+
+  getProductsByCategory(categoryId: number): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>(`http://localhost:7195/api/Product/GetProductsByCategory?categoryId=${categoryId}`).pipe(catchError(this.errorHandler));
+  }
+
+  getProductsByPriceRange(minPrice: number, maxPrice: number): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>(`http://localhost:7195/api/Product/GetProductsByPriceRange?minPrice=${minPrice}&maxPrice=${maxPrice}`).pipe(catchError(this.errorHandler));
+  }
+
+  getSearchProducts(item: string): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>(`http://localhost:7195/api/Product/SearchProducts?searchTerm=${item}`).pipe(catchError(this.errorHandler));
+  }
+
+  addProduct(product: IProduct): Observable<IProduct> {
+    return this.http.post<IProduct>(`http://localhost:7195/api/Product/AddProduct`, product).pipe(catchError(this.errorHandler));
+  }
+
+  updateProduct(product: IProduct): Observable<IProduct> {
+    return this.http.put<IProduct>(`http://localhost:7195/api/Product/UpdateProduct`, product).pipe(catchError(this.errorHandler));
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`http://localhost:7195/api/Product/DeleteProduct?id=${id}`).pipe(catchError(this.errorHandler));
+  }
+
+  getProductImages(id: number): Observable<IProduct> {
+    return this.http.get<IProduct>(`http://localhost:7195/api/Product/GetProductImages?productId=${id}`).pipe(catchError(this.errorHandler));
+  }
+
+  errorHandler(error: HttpErrorResponse) {
+    console.log(error);
+    return throwError(error.message || 'ERROR');
+  }
+}
+
+
+//app.module.ts
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
+
+
+import { AppComponent } from './app.component';
+import { FormsModule } from '@angular/forms';
+import { routing } from './app.routing';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    
+  ],
+  imports: [
+    BrowserModule, HttpClientModule, FormsModule, routing
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class AppModule { }
+
+
+//app.routing.ts
+import { RouterModule } from '@angular/router';
+
+export var routing = RouterModule.forRoot([
+  //{ path: 'product/:id', component: ViewProductComponent }
+  
+  //{ path: '**', component: ViewDoctorComponent }
+
+])
+
+
+//styles.css
+@import "~bootstrap/dist/css/bootstrap.css";
+@import "~font-awesome/css/font-awesome.css";
+
+
+
+
+//app.component.html
+<div style="text-align:center">
+  <h1>
+    Welcome to {{title}}!
+  </h1>
+</div>
+
+
+
+
+You need to maintain the similar kind of code style in the developed product-details.component.ts file as like the example component.ts file.
+// example component.ts file
+import { Component, OnInit } from '@angular/core';
+import { IProduct } from '../quickKart-interfaces/product';
+import { ICategory } from '../quickKart-interfaces/category';
+import { ProductService } from '../quickKart-services/product-service/product.service';
+import { UserService } from '../quickKart-services/user-service/user.service';
+import { ICartProduct } from '../quickKart-interfaces/cartProduct';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-view-products',
+  templateUrl: './view-products.component.html',
+  styleUrls: ['./view-products.component.css']
+})
+export class ViewProductsComponent implements OnInit {
+  products: IProduct[] = [];
+  categories: ICategory[] = [];
+  filteredProducts: IProduct[] = [];
+  imageSrc: string = "";
+  showMsgDiv: boolean = false;
+  errorMsg: string = "";
+  userRole: string = "";
+  userName :string = "";
+  commonLayout: boolean = false;
+  customerLayout: boolean = false;
+  constructor(private _productService: ProductService, private _userService: UserService) {
+    this.userRole = <string>sessionStorage.getItem("userRole");
+    this.userName = <string>sessionStorage.getItem("userName");
+    if (this.userRole == "Customer") {
+      this.customerLayout = true;
+    } else {
+      this.commonLayout = true;
+    }
+
+  }
+
+
+
+  ngOnInit() {
+
+    this.getProducts()
+   
+    
+    
+    if (this.products == null) {
+      this.showMsgDiv = true;
+    }
+    this.filteredProducts = this.products;
+    this.imageSrc = "assets/quickKart-images/add-item.jpg";
+
+  }
+
+
+  getProducts() {
+    this._productService.getProducts().subscribe(
+      //1st Arg (Valid Data)
+      responseProductData => {
+        this.products = responseProductData;
+        this.filteredProducts = responseProductData;
+        this.showMsgDiv = false;
+        this.getProductcategories()
+
+      },
+
+      //2nd Arg (Error Occurs)
+      responseProductError => {
+        this.products = []
+        this.errorMsg = responseProductError;
+        console.log(this.errorMsg);
+      },
+
+      //3rd Arg
+      () => { console.log("GetProducts method executed successfully"); }
+    )
+  }
+
+
+  getProductcategories() {
+    this._productService.getProductCategories().subscribe(
+      responseCategories => {
+        this.categories = responseCategories;
+      },
+
+      responseCategoryError => {
+        this.categories = [];
+        this.errorMsg = responseCategoryError;
+        console.log(this.errorMsg);
+      },
+
+      () => { console.log("GetCategories executed successfully"); }
+
+    )
+  }
+
+
+  
+
+
+  searchProductByCategory(categoryId: string) {
+    this.filteredProducts = this.products;
+    if (categoryId == "0") {
+      this.filteredProducts = this.products;
+    }
+    else {
+      this.filteredProducts = this.filteredProducts?.filter(prod => prod.categoryId.toString() == categoryId);
+    }
+  }
+
+
+  addToCart(product: IProduct) {
+    this._userService.addProductToCart(product.productId, this.userName).subscribe(
+      responseAddToCart => {
+        if (responseAddToCart) {
+          alert("Product Added successfully");
+        } else {
+          alert("Product could NOT be added to the cart.");
+        }
+      },
+
+      responseAddToCartError => {
+        this.errorMsg = responseAddToCartError;
+        console.log(this.errorMsg);
+        alert("Sorry, Something went wrong! Please try again later")
+      },
+
+      () => {
+        console.log("Add to Cart executed successfully");
+      }
+    );
+  }
+
+
+  
+
+
+}
+
+
+
+
