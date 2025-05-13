@@ -1,0 +1,1 @@
+Instead of installing the model-viewer pacakge  can we use the cdn or any other java script embeded code from google. If yes modify the code according to it.
