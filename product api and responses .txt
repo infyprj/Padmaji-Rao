@@ -1,0 +1,34 @@
+Request URL
+https://localhost:7195/api/Product/GetProductById?id=1
+Response body
+{
+  "productId": 1,
+  "name": "sofa1",
+  "description": "Wood Velvet 2 seater Sofa for Living Room",
+  "price": 15000,
+  "categoryId": 1,
+  "modelUrl": "https://shop3dprojectaccount.blob.core.windows.net/3d-models/Sofa1.glb",
+  "thumbnailUrl": "https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png",
+  "quantity": 20
+}
+
+
+
+Request URL
+https://localhost:7195/api/Product/GetProductImages?productId=1
+Response body
+[
+  {
+    "imageId": 1,
+    "productId": 1,
+    "imageUrl": "https://example.com/images/product1_img1.jpg"
+  },
+  {
+    "imageId": 2,
+    "productId": 1,
+    "imageUrl": "https://example.com/images/product1_img2.jpg"
+  }
+]
+
+
+
