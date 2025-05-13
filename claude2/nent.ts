@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IProduct } from '../../interfaces/product';
 import { ProductService } from '../../services/product-service';
 
@@ -21,48 +21,67 @@ export class ProductDetailComponent implements OnInit {
   errorMsg: string = '';
   activeImageUrl: string = '';
   quantity: number = 1;
+  productId: number = 0;
 
   constructor(
-    private _route: ActivatedRoute,
+    private route: ActivatedRoute,
+    private router: Router,
     private _productService: ProductService
   ) { }
 
-  ngOnInit() {
-    // Get product ID from route parameter
-    const id = Number(this._route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.getProductDetails(id);
-      this.getProductImages(id);
-    } else {
-      this.errorMsg = 'Invalid product ID';
-      this.loading = false;
-    }
+  ngOnInit(): void {
+    console.log("In ngOnInit");
+    
+    // First approach: Using snapshot
+    const idParam = this.route.snapshot.paramMap.get('id');
+    console.log("ID from snapshot:", idParam);
+    
+    // Second approach: Using paramMap observable
+    this.route.paramMap.subscribe(params => {
+      console.log("ID from paramMap observable:", params.get('id'));
+      const id = Number(params.get('id'));
+      this.productId = id;
+      
+      if (id) {
+        this.getProductDetails(id);
+        this.getProductImages(id);
+      } else {
+        this.errorMsg = 'Invalid product ID';
+        this.loading = false;
+      }
+    });
   }
 
   getProductDetails(id: number) {
+    console.log("Fetching product details for ID:", id);
     this._productService.getProductById(id).subscribe(
       responseProductData => {
+        console.log("Product data received:", responseProductData);
         this.product = responseProductData;
-        this.activeImageUrl = this.product.thumbnailUrl;
+        if (this.product) {
+          this.activeImageUrl = this.product.thumbnailUrl;
+        }
         this.loading = false;
       },
       responseProductError => {
         this.errorMsg = responseProductError;
         this.loading = false;
-        console.log(this.errorMsg);
+        console.error("Error fetching product:", this.errorMsg);
       },
       () => { console.log('GetProductDetails method executed successfully'); }
     );
   }
 
   getProductImages(id: number) {
+    console.log("Fetching product images for ID:", id);
     this._productService.getProductImages(id).subscribe(
       (responseImagesData: any) => {
+        console.log("Product images received:", responseImagesData);
         this.productImages = responseImagesData;
       },
       responseImagesError => {
         this.errorMsg = responseImagesError;
-        console.log(this.errorMsg);
+        console.error("Error fetching images:", this.errorMsg);
       },
       () => { console.log('GetProductImages method executed successfully'); }
     );
