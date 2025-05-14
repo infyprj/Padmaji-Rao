@@ -1,4 +1,4 @@
-//product-detail.component.html
+//product-component.html
 <div class="container mt-5" *ngIf="loading">
   <div class="row">
     <div class="col-12 text-center">
@@ -14,21 +14,42 @@
     <!-- Product Images Section -->
     <div class="col-md-6">
       <div class="product-image-container mb-3 pl-2">
-        <img [src]="activeImageUrl" class="img-fluid main-product-image p-3" alt="{{ product.name }}">
+        <!-- Regular Image View -->
+        <img *ngIf="!is3DViewActive" [src]="activeImageUrl" class="img-fluid main-product-image p-3" alt="{{ product.name }}">
+
+        <!-- 3D Model Viewer -->
+        <model-viewer *ngIf="is3DViewActive"
+                      src="{{ modelUrl }}"
+                      alt="{{ product.name }} 3D Model"
+                      auto-rotate
+                      camera-controls
+                      shadow-intensity="1"
+                      exposure="1"
+                      class="model-viewer-container">
+        </model-viewer>
       </div>
 
       <div class="product-thumbnails d-flex flex-wrap">
         <!-- Main thumbnail -->
         <div class="thumbnail-item me-2 mb-2" (click)="setActiveImage(product.thumbnailUrl)">
           <img [src]="product.thumbnailUrl" class="img-thumbnail"
-               [ngClass]="{'active-thumbnail': activeImageUrl === product.thumbnailUrl}"
+               [ngClass]="{'active-thumbnail': activeImageUrl === product.thumbnailUrl && !is3DViewActive}"
                alt="{{ product.name }} main image">
         </div>
 
-        <!-- Additional images -->
+        <!-- 3D Model thumbnail (second position) -->
+        <div class="thumbnail-item me-2 mb-2 model-3d-thumb" (click)="toggle3DView()">
+          <div class="img-thumbnail 3d-thumbnail"
+               [ngClass]="{'active-thumbnail': is3DViewActive}">
+            <i class="fa fa-cube 3d-icon"></i>
+            <span class="3d-label">3D</span>
+          </div>
+        </div>
+
+        <!-- Additional images (starting from third position) -->
         <div class="thumbnail-item me-2 mb-2" *ngFor="let image of productImages" (click)="setActiveImage(image.imageUrl)">
           <img [src]="image.imageUrl" class="img-thumbnail"
-               [ngClass]="{'active-thumbnail': activeImageUrl === image.imageUrl}"
+               [ngClass]="{'active-thumbnail': activeImageUrl === image.imageUrl && !is3DViewActive}"
                alt="{{ product.name }} image">
         </div>
       </div>
@@ -37,19 +58,13 @@
     <!-- Product Details Section -->
     <div class="col-md-6 product-detail-section">
       <h1 class="product-title mb-3">{{ product.name }}</h1>
-     
 
       <div class="product-price mb-4">
         <h3 class="mb-2">₹{{ product.price.toLocaleString() }}</h3>
         <span class="text-success "><span class="fw-bold">In Stock </span>({{ product.quantity }} available)</span>
       </div>
 
-
-
-     
-
       <div class="quantity-selector d-flex flex-row mb-4 ">
-        
         <div class="input-group flex" style="width: 150px;">
           <button class="btn btn-outline-secondary" type="button" (click)="decrementQuantity()">
             <i class="fa fa-minus"></i>
@@ -88,8 +103,8 @@
 </div>
 
 
-//product-detail.component.ts
-import { Component, OnInit } from '@angular/core';
+//product-component.ts
+import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IProduct } from '../interfaces/product';
 import { ProductService } from '../services/product-service/product.service';
@@ -113,12 +128,15 @@ export class ProductDetailComponent implements OnInit {
   activeImageUrl: string = '';
   quantity: number = 1;
   productId: number = 0;
+  is3DViewActive = false
+  modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb" // Default model URL
 
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private _productService: ProductService
+    private _productService: ProductService,
+    private elementRef: ElementRef,
   ) { }
 
   ngOnInit(): void {
@@ -139,6 +157,17 @@ export class ProductDetailComponent implements OnInit {
       }
     
   }
+  ngAfterViewInit() {
+    // Load the model-viewer script
+    this.loadModelViewerScript()
+  }
+
+  loadModelViewerScript() {
+    const script = document.createElement("script")
+    script.type = "module"
+    script.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"
+    document.body.appendChild(script)
+  }
 
   getProductDetails(id: number) {
     console.log("Fetching product details for ID:", id);
@@ -148,6 +177,7 @@ export class ProductDetailComponent implements OnInit {
         this.product = responseProductData;
         if (this.product) {
           this.activeImageUrl = this.product.thumbnailUrl;
+          this.modelUrl = this.product.modelUrl || this.modelUrl;
         }
         this.loading = false;
       },
@@ -179,6 +209,14 @@ export class ProductDetailComponent implements OnInit {
     this.activeImageUrl = imageUrl;
   }
 
+  toggle3DView() {
+    this.is3DViewActive = !this.is3DViewActive
+    if (!this.is3DViewActive) {
+      // If turning off 3D view, revert to the main image
+      this.activeImageUrl = this.product?.thumbnailUrl || ""
+    }
+  }
+
   incrementQuantity() {
     if (this.product && this.quantity < this.product.quantity) {
       this.quantity++;
@@ -200,101 +238,42 @@ export class ProductDetailComponent implements OnInit {
 }
 
 
-//product-detail.component.css
-.main-product-image {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  object-fit: contain;
-  max-height: 400px;
-  background-color: #f8f9fa;
-}
+For the above codes, when I click on the second thumbnail i.e 3d option, The following errors has occuurred in the console.
+Access to fetch at 'https://shop3dprojectaccount.blob.core.windows.net/3d-models/Sofa1.glb' from origin 'http://localhost:4200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+model-viewer.js:34407 
+GET https://shop3dprojectaccount.blob.core.windows.net/3d-models/Sofa1.glb net::ERR_FAILED 200 (OK)
+(anonymous) @ zone.js:1521
+proto.<computed> @ zone.js:976
+load @ model-viewer.js:34407
+load @ model-viewer.js:40257
+(anonymous) @ model-viewer.js:45826
+ZoneAwarePromise @ zone.js:1432
+(anonymous) @ model-viewer.js:45825
+preload @ model-viewer.js:45933
+load @ model-viewer.js:45963
+i @ model-viewer.js:57643
+ZoneAwarePromise @ zone.js:1432
+setSource @ model-viewer.js:57640
+[updateSource] @ model-viewer.js:58914
+(anonymous) @ model-viewer.js:58622
+invoke @ zone.js:375
+onInvoke @ core.mjs:25762
+invoke @ zone.js:374
+runGuarded @ zone.js:144
+(anonymous) @ zone.js:128
+model-viewer.js:45946 
 
-.product-image-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-/*  background-color: #f8f9fa;*/
-  border-radius: 8px;
-}
-
-.thumbnail-item {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 80px;
-  height: 80px;
-  overflow: hidden;
-}
-
-  .thumbnail-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .thumbnail-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-.active-thumbnail {
-  border: 2px solid #007bff !important;
-}
-.product-detail-section{
-    text-align:start
-}
-.product-title {
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.product-rating {
-  color: #ffc107;
-}
-
-.product-price h3 {
-  font-weight: 700;
-  color: #212529;
-  margin-bottom: 0.5rem;
-}
-
-.quantity-selector input {
-  font-weight: bold;
-}
-
-.product-actions .btn {
-  padding: 0.75rem 1.5rem;
-}
-
-.nav-tabs .nav-link {
-  font-weight: 500;
-}
-
-.tab-content {
-  background-color: #fff;
-}
-
-/* Responsive adjustments */
-@media (max-width: 767.98px) {
-  .product-image-container {
-    height: 300px;
-  }
-
-  .thumbnail-item {
-    width: 60px;
-    height: 60px;
-  }
-
-  .product-actions .btn {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-}
+TypeError: Failed to fetch
+    at zone.js:1521:36
+    at proto.<computed> (zone.js:976:24)
+    at Wo.load (model-viewer.js:34407:3)
+    at Sh.load (model-viewer.js:40257:10)
+    at model-viewer.js:45826:16
+    at new ZoneAwarePromise (zone.js:1432:21)
+    at model-viewer.js:45825:12
+    at ud.preload (model-viewer.js:45933:34)
+    at ud.load (model-viewer.js:45963:20)
+    at i (model-viewer.js:57643:73)
 
 
-
-
-
-The above codes I have done already. I want to add the 3d model feature.For this, make the second thumbnail image as 3d option image, so that when the second thumbnail is clicked then it opens 3d model . Use the google's <model-viewer> component by using embeded javascript.
+What are the main causes for these errors. Is the stored .glb file in azure is not accessible or model-viewer is not working or issue in both of them. Deep down into the errors and tell me the solution to rectify it. Is there any simpler option to display , rotate and zoom the 3d model. 
