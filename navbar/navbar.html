@@ -1,1 +1,98 @@
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <i class="fa fa-cube me-2"></i>
+      <span class="fw-bold">Shop3D</span>
+    </a>
+    
+    <!-- Hamburger button for mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
+    <!-- Navbar content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Left side menu items -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="fa fa-home me-1"></i> Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fa fa-th-large me-1"></i> Categories
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fa fa-tag me-1"></i> Deals
+          </a>
+        </li>
+      </ul>
+      
+      <!-- Search bar - visible on desktop -->
+      <form class="d-none d-lg-flex me-auto search-form">
+        <div class="input-group">
+          <input class="form-control search-input" type="search" placeholder="Search products..." aria-label="Search">
+          <button class="btn search-btn" type="submit">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+      </form>
+      
+      <!-- Right side menu items -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <div class="d-flex align-items-center">
+              <div class="nav-icon-container">
+                <i class="fa fa-heart"></i>
+                <span class="badge rounded-pill">2</span>
+              </div>
+              <span class="d-lg-inline d-none ms-1">Wishlist</span>
+            </div>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <div class="d-flex align-items-center">
+              <div class="nav-icon-container">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="badge rounded-pill">3</span>
+              </div>
+              <span class="d-lg-inline d-none ms-1">Cart</span>
+            </div>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-user-circle me-1"></i>
+            <span class="d-lg-inline d-none">Profile</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#"><i class="fa fa-user me-2"></i>My Account</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fa fa-list me-2"></i>Orders</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="fa fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Search bar - visible only on mobile -->
+<div class="container d-block d-lg-none mt-2 mb-3">
+  <form class="search-form-mobile">
+    <div class="input-group">
+      <input class="form-control search-input" type="search" placeholder="Search products..." aria-label="Search">
+      <button class="btn search-btn" type="submit">
+        <i class="fa fa-search"></i>
+      </button>
+    </div>
+  </form>
+</div>
