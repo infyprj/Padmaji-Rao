@@ -1,0 +1,11 @@
+Create a most visually more appealing navbar for the foloowing :
+Shop3D and Home on left side
+Wishlist , Cart and Profile, Logout on right side.
+
+Use the appealing icons if needed. It has to be responsive, In mobile it will become hambergur menu.
+
+Choose the most professional colors for navbar which will be used in e commerce platform.
+
+You can use bootstrap if needed.
+
+Create a angular html file (write only direct navbar html instead of <html> and <body> tags) and css file
