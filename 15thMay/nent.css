@@ -59,9 +59,7 @@ model-viewer {
   height: 100%;
 }
 
-\
-.3
-d-thumbnail {
+.3d-thumbnail {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -71,14 +69,12 @@ d-thumbnail {
   width: 100%;
 }
 
-.3
-d-icon {
+.3d-icon {
   font-size: 24px;
   color: #007bff;
 }
 
-.3
-d-label {
+.3d-label {
   font-size: 12px;
   font-weight: bold;
   margin-top: 4px;
@@ -142,20 +138,63 @@ d-label {
 }
 
 .toast-container{
-    z-index:1000;
-    width:300px;
-    background-color:transparent;
+    z-index: 1000;
+    width: 300px;
+    background-color: transparent;
+}
+
+/* Toast Animations */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
 }
 
 .toast {
   display: block;
-  opacity: 1;
+  opacity: 0;
   background-color: transparent;
   border-radius: 10px;
-  border: 1px solid green
+  transform: translateY(-100%);
+  transition: all 0.3s ease;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.toast.show{
-    display:block;
-    opacity:1;
+/* Success toast style (green) */
+.toast-success {
+  border: 1px solid #28a745;
+  color: #28a745;
+}
+
+/* Warning toast style (orange) */
+.toast-warning {
+  border: 1px solid #fd7e14;
+  color: #fd7e14;
+}
+
+.toast.show {
+  display: block;
+  opacity: 1;
+  animation: slideDown 0.4s ease forwards;
+}
+
+.toast.hide {
+  animation: slideUp 0.3s ease forwards;
 }
