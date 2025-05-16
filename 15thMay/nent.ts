@@ -28,8 +28,8 @@ export class ProductDetailComponent implements OnInit {
   modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb" // Default model URL
   showToast = false;
   toastMessage = "";
-  toastStatus = 0;
- 
+  toastStatus = 0; // 0 = already added (orange), 1 = successfully added (green)
+
 
 
   constructor(
@@ -40,13 +40,13 @@ export class ProductDetailComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    
+
     // First approach: Using snapshot
     this.productId = +this.route.snapshot.params['id'];
-    
+
 
     // Second approach: Using paramMap observable
-    
+
 
     if (this.productId) {
       this.getProductDetails(this.productId);
@@ -55,7 +55,7 @@ export class ProductDetailComponent implements OnInit {
         this.errorMsg = 'Invalid product ID';
         this.loading = false;
       }
-    
+
   }
   ngAfterViewInit() {
     // Load the model-viewer script
@@ -78,7 +78,7 @@ export class ProductDetailComponent implements OnInit {
         if (this.product) {
           this.activeImageUrl = this.product.thumbnailUrl;
           this.modelUrl = this.product.modelUrl || this.modelUrl;
-          
+
         }
         this.loading = false;
       },
@@ -115,7 +115,7 @@ export class ProductDetailComponent implements OnInit {
 
   active3DView() {
     this.is3DViewActive = true;
-    
+
   }
 
   incrementQuantity() {
@@ -147,36 +147,39 @@ export class ProductDetailComponent implements OnInit {
       this._productService.addProductToWishlist(wishlistProduct).subscribe(
         responseData => {
           if (responseData) {
-            this.showToastMessage("Product Added to Wishlist",1)
-            //alert("Product Successfully added to WishList :" + responseData);
+            // Product successfully added - show green toast
+            this.showToastMessage("Product Added to Wishlist", 1)
           } else {
-            this.showToastMessage("Already Added to Wishlist",0)
-            //alert("Already Added to Wishlist")
+            // Product already added - show orange toast
+            this.showToastMessage("Already Added to Wishlist", 0)
           }
-          
         },
         responseError => {
           this.errorMsg = responseError
           console.error("Error Wishlisting product:", this.errorMsg);
         },
-        () => { console.log("Add to Wishlist successfully execcuted!!"); }
-        
+        () => { console.log("Add to Wishlist successfully executed!!"); }
       )
     }
   }
 
 
-  showToastMessage(message: string,status:number) {
+  showToastMessage(message: string, status: number) {
     this.toastMessage = message;
+    this.toastStatus = status; // 0 = already added (orange), 1 = successfully added (green)
     this.showToast = true;
-    this.toastStatus = status;
+    
     setTimeout(() => {
-      this.showToast = false;
+      // Add the hide class first to animate the toast sliding up
+      const toastElement = this.elementRef.nativeElement.querySelector('.toast');
+      if (toastElement) {
+        toastElement.classList.add('hide');
+      }
+      
+      // Then hide the toast after animation completes
+      setTimeout(() => {
+        this.showToast = false;
+      }, 300); // Match this with the slideUp animation duration
     }, 2000);
   }
-
-
-
-
-
 }
