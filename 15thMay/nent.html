@@ -10,8 +10,11 @@
 
 
 <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-2 mt-2" *ngIf="showToast">
-  <div class="toast text-success" role="alert" aria-live="assertive" aria-atomic="true" [ngClass]="{'show':showToast}"> 
-    <div class="toast-body ">
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" 
+       [ngClass]="{'show': showToast, 'toast-success': toastStatus === 1, 'toast-warning': toastStatus === 0}"> 
+    <div class="toast-body d-flex align-items-center">
+      <i *ngIf="toastStatus === 1" class="fa fa-check-circle me-2"></i>
+      <i *ngIf="toastStatus === 0" class="fa fa-exclamation-circle me-2"></i>
       {{toastMessage}}
     </div>
   </div>
@@ -29,7 +32,7 @@
         <model-viewer *ngIf="is3DViewActive"
                       src="{{ modelUrl }}"
                       alt="{{ product.name }} 3D Model"
-                      
+
                       shadow-intensity="1"
                       exposure="1"
                       class="model-viewer-container">
@@ -42,7 +45,7 @@
              [ngClass]="{'active-thumbnail': activeImageUrl === product.thumbnailUrl && !is3DViewActive}"
              >
           <img [src]="product.thumbnailUrl" class=""
-               
+
                alt="product image">
         </div>
 
@@ -62,7 +65,7 @@
              [ngClass]="{'active-thumbnail': activeImageUrl === image.imageUrl && !is3DViewActive}"
              >
           <img [src]="image.imageUrl" class=""
-               
+
                alt="product image">
         </div>
       </div>
@@ -109,7 +112,8 @@
 <div class="container mt-5" *ngIf="!loading && !product">
   <div class="alert alert-danger" role="alert">
     <h4 class="alert-heading">Product Not Found!</h4>
-    <p>Sorry, we couldn't find the product you're looking for. {{ errorMsg }}</p>
+    <p>Sorry, we couldn't find the product you're looking for. {{ 
+errorMsg }}</p>
     <hr>
     <p class="mb-0">Please try again or browse our other products.</p>
   </div>
