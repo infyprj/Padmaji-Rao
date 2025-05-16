@@ -1,0 +1,10 @@
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-2 mt-2" *ngIf="showToast">
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+       [ngClass]="{'show': showToast, 'toast-success': toastStatus === 1, 'toast-warning': toastStatus === 0}">
+    <div class="toast-body d-flex align-items-center justify-content-center">
+      <i *ngIf="toastStatus === 1" class="fa fa-check-circle me-2"></i>
+      <i *ngIf="toastStatus === 0" class="fa fa-exclamation-circle me-2"></i>
+      {{toastMessage}}
+    </div>
+  </div>
+</div>
