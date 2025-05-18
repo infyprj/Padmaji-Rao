@@ -1,14 +1,21 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container">
+  <div class="container-fluid">
     <!-- Brand/logo -->
-    <a class="navbar-brand " href="#">
+    <a class="navbar-brand" href="#">
       <i class="fa fa-cube me-2"></i>
       <span class="fw-bold fs-4">Shop3D</span>
     </a>
 
     <!-- Hamburger button for mobile -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarContent"
+      aria-controls="navbarContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -18,42 +25,21 @@
       <ul class="navbar-nav me-auto ml-4 mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link fs-5" aria-current="page" href="#">
-            <i class="fa fa-home me-1 "></i> <span class="fs-6">Home</span>
+            <i class="fa fa-home me-1"></i> <span class="fs-6">Home</span>
           </a>
         </li>
       </ul>
-        <!--<li class="nav-item">
-          <a class="nav-link" href="#">
-            <i class="fa fa-th-large me-1"></i> Categories
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">
-            <i class="fa fa-tag me-1"></i> Deals
-          </a>
-        </li>-->
-      <!--</ul>-->
-
-      <!-- Search bar - visible on desktop -->
-      <!--<form class="d-none d-lg-flex me-auto search-form">
-        <div class="input-group">
-          <input class="form-control search-input" type="search" placeholder="Search products..." aria-label="Search">
-          <button class="btn search-btn" type="submit">
-            <i class="fa fa-search"></i>
-          </button>
-        </div>
-      </form>-->
 
       <!-- Right side menu items -->
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link " href="#">
+          <a class="nav-link" href="#">
             <div class="d-flex align-items-center">
-              <div class="nav-icon-container ">
+              <div class="nav-icon-container">
                 <i class="fa fa-heart fs-5"></i>
-                <span class="badge rounded-pill ">2</span>
+                <span class="badge rounded-pill">2</span>
               </div>
-              <span class="d-lg-inline d-none ms-1 fs-6 ">Wishlist</span>
+              <span class="d-lg-inline d-none ms-1 fs-6">Wishlist</span>
             </div>
           </a>
         </li>
@@ -68,16 +54,80 @@
             </div>
           </a>
         </li>
-        <li class="nav-item dropdown" (click)="toggleDropdown()">
-          <a class="nav-link dropdown-toggle">
+
+        <li
+          class="nav-item dropdown"
+          (mouseenter)="onHover()"
+          (mouseleave)="onMouseLeave()"
+          ng-mouseleave="showDropdown = false"
+        >
+          <a class="nav-link">
             <i class="fa fa-user-circle me-1"></i>
-            <span class="d-lg-inline d-none">Profile</span>
+            <span class="d-lg-inline d-none profile-btn">Profile</span>
           </a>
-          <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
-            <li><a class="dropdown-item" href="#">My Account</a></li>
-            <li><a class="dropdown-item" href="#"><i class="fa fa-list me-2"></i>Update Profile</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#"><i class="fa fa-sign-out-alt me-2"></i>Logout</a></li>
+          <ul class="dropdown-menu" [ngClass]="{ show: showDropdown }">
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="17"
+                  height="17"
+                  fill="currentColor"
+                  class="bi bi-person"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"
+                  />
+                </svg>
+                <span class="dropdown-name">My Account</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-pencil-square"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
+                  />
+                </svg>
+                <span class="dropdown-name">Update Profile</span>
+              </a>
+            </li>
+
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-box-arrow-right text-danger"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"
+                  />
+                </svg>
+                <span class="dropdown-name text-danger">Logout</span>
+              </a>
+            </li>
           </ul>
         </li>
       </ul>
@@ -85,24 +135,6 @@
   </div>
 </nav>
 
-<!-- Search bar - visible only on mobile -->
-<!--<div class="container d-block d-lg-none mt-2 mb-3">
-  <form class="search-form-mobile">
-    <div class="input-group">
-      <input class="form-control search-input" type="search" placeholder="Search products..." aria-label="Search">
-      <button class="btn search-btn" type="submit">
-        <i class="fa fa-search"></i>
-      </button>
-    </div>
-  </form>
-</div>-->
-
-
 <div style="text-align:center">
-  <!--<router-outlet></router-outlet>-->
+  <!-- <router-outlet></router-outlet> -->
 </div>
-
-<!--<app-add-product></app-add-product>-->
-<!--<app-update-product></app-update-product>-->
-<!--<app-delete-product></app-delete-product>-->
-<app-user-profile></app-user-profile>
