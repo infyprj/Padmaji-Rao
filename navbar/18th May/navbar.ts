@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, VERSION } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'my-app',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: [ './app.component.css' ]
 })
-export class AppComponent {
-  title = 'Shop3DApp';
+export class AppComponent  {
+  name = 'Angular ' + VERSION.major;
 
   showMenu = false;
   showDropdown = false;
@@ -22,6 +22,15 @@ export class AppComponent {
 
   toggleDropdown(): void {
     this.showDropdown = !this.showDropdown;
+  }
+
+
+  onHover():void{
+    this.showDropdown=true;
+  }
+
+  onMouseLeave():void{
+    this.showDropdown=false;
   }
 
 
