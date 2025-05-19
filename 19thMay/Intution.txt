@@ -1,0 +1,37 @@
+Fix the nav bar at top always.
+
+
+//GetCart
+https://localhost:7195/api/Cart/GetCartItems?userId=1
+[
+  {
+    "cartItemID": 1,
+    "cartID": 1,
+    "productID": 1,
+    "quantity": 2,
+    "name": "Velvet Elegance Two-Seater",
+    "description": "A luxurious two-seater sofa featuring premium velvet upholstery with a sturdy wooden frame, designed for modern living rooms. The plush cushions and elegant design provide both comfort and style, making it a perfect centerpiece for your home decor. Available in multiple color options upon request.",
+    "price": 15000,
+    "thumbnailURL": "https://shop3dprojectaccount.blob.core.windows.net/images/Sofa1.png"
+  },
+  {
+    "cartItemID": 2,
+    "cartID": 1,
+    "productID": 3,
+    "quantity": 1,
+    "name": "Serenity Platform Bed",
+    "description": "A modern platform bed with built-in under-bed storage, crafted from premium engineered wood for durability. The sleek design features a low profile with ample storage space, perfect for organizing bedding and accessories. The sturdy slat support ensures comfort and longevity for all mattress types.",
+    "price": 20000,
+    "thumbnailURL": "https://shop3dprojectaccount.blob.core.windows.net/images/Bed.png"
+  }
+]
+
+
+
+
+When product is aaded from wishlist to cart ----> It should be deleted from wishlist table and added to cart table
+
+When the Move to Wishlist is clicked ---> It should be deleted from cart and added to wishlist
+
+
+When the Remove From Cart is clicked ---> It should be deleted from cart.
