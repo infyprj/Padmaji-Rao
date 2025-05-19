@@ -1,0 +1,104 @@
+<div class="cart-container">
+  <div class="cart-header">
+    <h2><i class="fas fa-shopping-cart"></i> Shopping Cart</h2>
+    <p class="cart-subtitle">{{ cartItems.length }} item(s) in your cart</p>
+  </div>
+
+  <div class="cart-content" *ngIf="cartItems.length > 0; else emptyCart">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <div class="item-image">
+          <img [src]="item.thumbnailURL" [alt]="item.name" class="product-image">
+        </div>
+        
+        <div class="item-details">
+          <h5 class="item-name">{{ item.name }}</h5>
+          <p class="item-description">{{ item.description }}</p>
+          <div class="item-price">₹{{ item.price | number:'1.0-0' }}</div>
+        </div>
+
+        <div class="item-quantity">
+          <label class="quantity-label">Quantity:</label>
+          <div class="quantity-controls">
+            <button class="quantity-btn" (click)="decreaseQuantity(item)">
+              <i class="fas fa-minus"></i>
+            </button>
+            <span class="quantity-value">{{ item.quantity }}</span>
+            <button class="quantity-btn" (click)="increaseQuantity(item)">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="item-total">
+          <div class="total-label">Total:</div>
+          <div class="total-amount">₹{{ (item.price * item.quantity) | number:'1.0-0' }}</div>
+        </div>
+
+        <div class="item-actions">
+          <button class="remove-btn" (click)="removeItem(item)" title="Remove item">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-card">
+        <h4 class="summary-title">Order Summary</h4>
+        
+        <div class="summary-row">
+          <span class="summary-label">Subtotal ({{ getTotalItems() }} items):</span>
+          <span class="summary-value">₹{{ getSubtotal() | number:'1.0-0' }}</span>
+        </div>
+        
+        <div class="summary-row">
+          <span class="summary-label">Shipping:</span>
+          <span class="summary-value">{{ getShippingCost() === 0 ? 'FREE' : '₹' + (getShippingCost() | number:'1.0-0') }}</span>
+        </div>
+        
+        <div class="summary-row">
+          <span class="summary-label">Tax (18% GST):</span>
+          <span class="summary-value">₹{{ getTaxAmount() | number:'1.0-0' }}</span>
+        </div>
+        
+        <hr class="summary-divider">
+        
+        <div class="summary-row total-row">
+          <span class="summary-label">Total:</span>
+          <span class="summary-value total-amount">₹{{ getTotal() | number:'1.0-0' }}</span>
+        </div>
+
+        <div class="checkout-actions">
+          <button class="continue-shopping-btn" (click)="continueShopping()">
+            <i class="fas fa-arrow-left"></i> Continue Shopping
+          </button>
+          <button class="checkout-btn" (click)="proceedToCheckout()">
+            <i class="fas fa-credit-card"></i> Proceed to Checkout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <div class="empty-cart">
+      <div class="empty-cart-icon">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <h3 class="empty-cart-title">Your cart is empty</h3>
+      <p class="empty-cart-message">Add some amazing furniture to your cart and make your home beautiful!</p>
+      <button class="shop-now-btn" (click)="continueShopping()">
+        <i class="fas fa-store"></i> Shop Now
+      </button>
+    </div>
+  </ng-template>
+
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <p>Loading your cart...</p>
+  </div>
+</div>
