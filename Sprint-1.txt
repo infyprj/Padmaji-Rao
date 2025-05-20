@@ -1,0 +1,43 @@
+-------------------------------Navbar-----------------------------------------
+Visible on any route/ component
+Routings for each navbar link
+Each navbar item is highlighted when it is cliked
+Profile Dropdown while hovering
+Added profile routings in that dropdown
+Icons from the bootstrap
+Hovering Transitions
+
+---->Different navbar for different roles of user
+	Guest User >> Login & Signup
+	Customer >> Wishlist, Cart & Profile
+		----->Wishlist count and Cart count badges
+	Admin >> Add New Product & Profile
+
+
+-----------------------------Product detail Page------------------------------
+Added one 2d image and 3d model of the product
+2d and 3d model images are accessed from the public URLs which is stored in Azure Storage Services
+3d model image  can be viewed in 3d and can be rotated, zoomed. (The loading time is more because the 3d model have more size like 6mb) 
+Quantity Increment Decrement button
+Add to cart and Add to wishlist buttons
+---->Added Login Suggestions if the user is not logged-in but try to click the wishlist and add to cart buttons. 
+---->User friendly toast notifications to notify the completion of that button action to the user.
+For successful >> shows green toast notifications
+For already added items >> Shows orange color toasts
+
+
+
+----------------------------Cart Page--------------------------------------
+Added quantity increment and decrement button.
+--->Dynamic calculation of the total price based on the increment and decrement in quantity
+--->"Move to bag" button >> If the customer does not want to buy the product , he can remove from the cart and can add it to the wishlist if he wants
+--->"Remove from Cart" button >> If the customer does not want to buy the product and also not to add in the wishlist , he can remove the product
+In Order Summary >> Added 18% GST on the total orders , and Free shipping charges if total amount crosses the 50,000.
+Continue to shopping button to shop more
+
+
+
+
+Added userId and userRoleId in session storage
+Helped the team on how to reolve merge conflicts
+
