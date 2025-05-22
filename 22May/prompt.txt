@@ -1,0 +1,710 @@
+I am developing .Net project. Used ASP .Net Core Web API for backend and Angular for front end. 
+I create a navbar angular component which contains .ts, .html and .css files. And also I have different components  for different routes. I used the navbar selector at top in each component .
+Navbar has wishlist and cart links and have no. of items in wishlist as a badge  in navbar and also similar for cart. 
+When I click the add to cart button in product-detail page the badge count count is not incremented dynamically. But it updated when the route changes. Give some good and working suggestions to implement dynamic update in badge counts.
+
+
+
+//product-detail.html
+<app-navbar></app-navbar>
+
+
+<div class="container mt-5" *ngIf="loading">
+  <div class="row">
+    <div class="col-12 text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-2 mt-2" *ngIf="showToast">
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+       [ngClass]="{'show': showToast, 'toast-success': toastStatus === 1, 'toast-warning': toastStatus === 0}">
+    <div class="toast-body d-flex align-items-center justify-content-center">
+      <i *ngIf="toastStatus === 1" class="fa fa-check-circle me-2"></i>
+      <i *ngIf="toastStatus === 0" class="fa fa-exclamation-circle me-2"></i>
+      {{toastMessage}}
+    </div>
+  </div>
+</div>
+
+
+
+<div class="container mt-5" *ngIf="!loading && product">
+  <div class="row">
+    <!-- Product Images Section -->
+    <div class="col-md-6">
+      <div class="product-image-container mb-3 pl-2">
+        <!-- Regular Image View -->
+        <img *ngIf="!is3DViewActive" [src]="activeImageUrl" class="img-fluid main-product-image p-3" alt="{{ product.name }}">
+
+        <!-- 3D Model Viewer -->
+        <model-viewer *ngIf="is3DViewActive"
+                      src="{{ modelUrl }}"
+                      alt="{{ product.name }} 3D Model"
+                      auto-rotate
+                      camera-controls
+                      shadow-intensity="1"
+                      exposure="1"
+                      class="model-viewer-container">
+        </model-viewer>
+      </div>
+
+      <div class="product-thumbnails d-flex flex-wrap">
+        <!-- Main thumbnail -->
+        <div class="thumbnail-item me-2 mb-2" (click)="setActiveImage(product.thumbnailUrl)"
+             [ngClass]="{'active-thumbnail': activeImageUrl === product.thumbnailUrl && !is3DViewActive}"
+             >
+          <img [src]="product.thumbnailUrl" class=""
+               
+               alt="product image">
+        </div>
+
+        <!-- 3D Model thumbnail (second position) -->
+        <div class="thumbnail-item me-2 mb-2 model-3d-thumb" (click)="active3DView()"
+             [ngClass]="{'active-thumbnail': is3DViewActive}"
+             >
+          <div class=" 3d-thumbnail"
+               >
+            <i class="fa fa-cube 3d-icon"></i>
+            <span class="3d-label">3D</span>
+          </div>
+        </div>
+
+        <!-- Additional images (starting from third position) -->
+        <!--<div class="thumbnail-item me-2 mb-2" *ngFor="let image of productImages" (click)="setActiveImage(image.imageUrl)"
+             [ngClass]="{'active-thumbnail': activeImageUrl === image.imageUrl && !is3DViewActive}"
+             >
+          <img [src]="image.imageUrl" class=""
+               
+               alt="product image">
+        </div>-->
+      </div>
+    </div>
+
+    
+//product-detail.ts
+import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IProduct } from '../interfaces/product';
+import { ISavedProduct } from '../interfaces/saved-product'
+import { ProductService } from '../services/product-service/product.service';
+import { ICartItem } from '../interfaces/cart';
+import { CartService } from '../services/cart-service/cart.service';
+
+
+interface ProductImage {
+  imageId: number;
+  productId: number;
+  imageUrl: string;
+}
+
+@Component({
+  selector: 'app-product-detail',
+  templateUrl: './product-detail.component.html',
+  styleUrls: ['./product-detail.component.css']
+})
+export class ProductDetailComponent implements OnInit {
+  product: IProduct | undefined;
+  productImages: ProductImage[] = [];
+  loading: boolean = true;
+  errorMsg: string = '';
+  activeImageUrl: string = '';
+  quantity: number = 1;
+  productId: number = 0;
+  is3DViewActive = false
+  modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb" // Default model URL
+  showToast = false;
+  toastMessage = "";
+  toastStatus = 0; // 0 = already added (orange), 1 = successfully added (green)
+  userId: number = 0;
+  userRoleId: number = 0;
+
+
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private _productService: ProductService,
+    private _cartSerive: CartService,
+    private elementRef: ElementRef,
+  ) { }
+
+  ngOnInit(): void {
+    this.productId = +this.route.snapshot.params['id'];
+
+    
+
+    if (this.productId) {
+      this.getProductDetails(this.productId);
+      this.getProductImages(this.productId);
+    } else {
+      this.errorMsg = 'Invalid product ID';
+      this.loading = false;
+    }
+
+  }
+  ngAfterViewInit() {
+    
+    this.loadModelViewerScript()
+  }
+
+  loadModelViewerScript() {
+    const script = document.createElement("script")
+    script.type = "module"
+    script.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"
+    document.body.appendChild(script)
+  }
+
+
+  getProductDetails(id: number) {
+    console.log("Fetching product details for ID:", id);
+    this._productService.getProductById(id).subscribe(
+      responseProductData => {
+        console.log("Product data received:", responseProductData);
+        this.product = responseProductData;
+        if (this.product) {
+          this.activeImageUrl = this.product.thumbnailUrl;
+          this.modelUrl = this.product.modelUrl || this.modelUrl;
+
+        }
+        this.loading = false;
+      },
+      responseProductError => {
+        this.errorMsg = responseProductError;
+        this.loading = false;
+        console.error("Error fetching product:", this.errorMsg);
+      },
+      () => { console.log('GetProductDetails method executed successfully'); }
+    );
+  }
+
+
+ 
+
+  setActiveImage(imageUrl: string) {
+    this.activeImageUrl = imageUrl;
+    if (this.is3DViewActive) {
+      this.is3DViewActive = false;
+    }
+  }
+
+
+  active3DView() {
+    this.is3DViewActive = true;
+
+  }
+
+  incrementQuantity() {
+    if (this.product && this.quantity < this.product.quantity) {
+      this.quantity++;
+    }
+  }
+
+  decrementQuantity() {
+    if (this.quantity > 1) {
+      this.quantity--;
+    }
+  }
+
+  addToCart() {
+
+    const ui: string = <string>sessionStorage.getItem("userId");
+    const uri: string = <string>sessionStorage.getItem("userRoleId");
+
+    this.userId = parseInt(ui);
+    this.userRoleId = parseInt(uri);
+
+    if (!this.userId) {
+      this.router.navigate(['/cart']);
+    } else {
+      if (this.product) {
+        const cartItem: ICartItem = {
+          userId: this.userId,
+          productId: this.product.productId,
+          quantity: this.quantity
+        }
+
+        this._cartSerive.addProductToCart(cartItem).subscribe(
+          responseData => {
+            if (responseData) {
+              this.showToastMessage("Product Added to Cart", 1);
+            } else {
+              this.showToastMessage("Already Added to Cart", 0)
+            }
+          },
+          responseError => {
+            this.errorMsg = responseError
+            console.error("Error Wishlisting product:", this.errorMsg);
+          }
+        )
+
+      }
+
+    }
+
+    
+  }
+
+
+  addToWhishlist() {
+
+    const ui: string = <string>sessionStorage.getItem("userId");
+    const uri: string = <string>sessionStorage.getItem("userRoleId");
+
+    this.userId = parseInt(ui);
+    this.userRoleId = parseInt(uri);
+
+    if (!this.userId) {
+      this.router.navigate(['/wishlist']);
+    } else {
+
+
+    if (this.product) {
+      const wishlistProduct: ISavedProduct = {
+        userId: this.userId,
+        productId: this.product.productId
+      }
+      this._productService.addProductToWishlist(wishlistProduct).subscribe(
+        responseData => {
+          if (responseData) {
+            // Product successfully added - show green toast
+            this.showToastMessage("Product Added to Wishlist", 1)
+          } else {
+            // Product already added - show orange toast
+            this.showToastMessage("Already Added to Wishlist", 0)
+          }
+        },
+        responseError => {
+          this.errorMsg = responseError
+          console.error("Error Wishlisting product:", this.errorMsg);
+        },
+        () => { console.log("Add to Wishlist successfully executed!!"); }
+      )
+      }
+    }
+  }
+
+
+  showToastMessage(message: string, status: number) {
+    this.toastMessage = message;
+    this.toastStatus = status; // 0 = already added (orange), 1 = successfully added (green)
+    this.showToast = true;
+
+    setTimeout(() => {
+      // Add the hide class first to animate the toast sliding up
+      const toastElement = this.elementRef.nativeElement.querySelector('.toast');
+      if (toastElement) {
+        toastElement.classList.add('hide');
+      }
+
+      // Then hide the toast after animation completes
+      setTimeout(() => {
+        this.showToast = false;
+      }, 300); // Match this with the slideUp animation duration
+    }, 3000);
+  }
+}
+
+//navbar.ts
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { CartService } from '../services/cart-service/cart.service';
+import { ProductService } from '../services/product-service/product.service';
+
+@Component({
+  selector: 'app-navbar',
+  templateUrl: './navbar.component.html',
+  styleUrls: ['./navbar.component.css']
+})
+export class NavbarComponent {
+  userRoleId: number = 0;
+  userId: number = 0;
+  guestNavbarShow: boolean = false;
+  customerNavbarShow: boolean = false;
+  adminNavbarShow: boolean = false;
+  cartCount: number = 0;
+  wishlistCount: number = 0;
+
+  showMenu = false;
+  showDropdown = false;
+
+  constructor(private router: Router, private _productService: ProductService, private _cartService: CartService) { }
+
+
+
+  ngOnInit(): void {
+
+    const uri: string = <string>sessionStorage.getItem('userRoleId');
+    const ui: string = <string>sessionStorage.getItem('userId');
+    this.userRoleId = parseInt(uri);
+    this.userId = parseInt(ui);
+    this.getCounts()
+    
+    if (this.userRoleId === 2) {
+      this.customerNavbarShow = true;
+    }
+    else if (this.userRoleId === 3) {
+      this.adminNavbarShow = true;
+    }
+    else {
+      this.guestNavbarShow = true;
+    }
+    this.userId = parseInt(ui);
+  }
+
+  getCounts(): void {
+
+    this._productService.getSavedProducts(this.userId).subscribe(
+      responseData => {
+        if (responseData) {
+          this.wishlistCount = responseData.length;
+        }
+      },
+      responseError => {
+        console.error("Error :" + responseError)
+      }
+    )
+
+
+    this._cartService.getCartItems().subscribe(
+      responseData => {
+        if (responseData) {
+          this.cartCount = responseData.length;
+        }
+      },
+      responseError => {
+        console.error("Error :" + responseError)
+      }
+    )
+  }
+
+  isActiveLink(route: string): boolean {
+    return this.router.url === route;
+  }
+
+  toggleMenu(): void {
+    this.showMenu = !this.showMenu;
+  }
+
+  clickDropdown(): void {
+    this.showDropdown = true;
+  }
+
+
+  onHover(): void {
+    this.showDropdown = true;
+  }
+
+  onMouseLeave(): void {
+    this.showDropdown = false;
+  }
+
+
+  onClickLogout(): void {
+    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("userRoleId")
+    this.router.navigate(['login']);
+    this.adminNavbarShow = false;
+    this.guestNavbarShow = false;
+    this.customerNavbarShow = false;
+    this.ngOnInit();
+  }
+}
+
+//navbar.html
+<!--Customer Navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark " *ngIf="customerNavbarShow">
+  <div class="container">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <i class="fa fa-cube me-2"></i>
+      <span class="fw-bold fs-4">Shop3D</span>
+    </a>
+
+    <!-- Hamburger button for mobile -->
+    <button class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Left side menu items -->
+      <ul class="navbar-nav me-auto ml-4 mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link fs-5" routerLink="/products" aria-current="page">
+            <i class="fa fa-home me-1" [ngClass]="{'active':isActiveLink('/products')}"></i> <span class="fs-6" [ngClass]="{'active':isActiveLink('/products')}">Home</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right side menu items -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item" >
+          <a class="nav-link" routerLink="/wishlist">
+            <div class="d-flex align-items-center">
+              <div class="nav-icon-container" [ngClass]="{'active':isActiveLink('/wishlist')}">
+                <i class="fa fa-heart fs-5"></i>
+                <span class="badge rounded-pill">{{wishlistCount}}</span>
+              </div>
+              <span class="d-lg-inline d-none ms-1 fs-6" [ngClass]="{'active':isActiveLink('/wishlist')}" >Wishlist</span>
+            </div>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/cart">
+            <div class="d-flex align-items-center">
+              <div class="nav-icon-container">
+                <i class="fa fa-shopping-cart fs-5" [ngClass]="{'active':isActiveLink('/cart')}"></i>
+                <span class="badge rounded-pill">{{cartCount}}</span>
+              </div>
+              <span class="d-lg-inline d-none ms-1 fs-6" [ngClass]="{'active':isActiveLink('/cart')}">Cart</span>
+            </div>
+          </a>
+        </li>
+
+        <li class="nav-item dropdown"
+            (mouseenter)="onHover()"
+            (mouseleave)="onMouseLeave()"
+            >
+          <a class="nav-link">
+            <i class="fa fa-user-circle me-1"></i>
+            <span class="d-lg-inline d-none profile-btn">Profile</span>
+          </a>
+          <ul class="dropdown-menu" [ngClass]="{ show: showDropdown }">
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="17"
+                     height="17"
+                     fill="currentColor"
+                     class="bi bi-person"
+                     viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                </svg>
+                <span class="dropdown-name" routerLink="/profile">My Account</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center" routerLink="/update-user">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="16"
+                     height="16"
+                     fill="currentColor"
+                     class="bi bi-pencil-square"
+                     viewBox="0 0 16 16">
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                  <path fill-rule="evenodd"
+                        d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                </svg>
+                <span class="dropdown-name">Update Profile</span>
+              </a>
+            </li>
+
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="16"
+                     height="16"
+                     fill="currentColor"
+                     class="bi bi-box-arrow-right text-danger"
+                     viewBox="0 0 16 16">
+                  <path fill-rule="evenodd"
+                        d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                  <path fill-rule="evenodd"
+                        d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+                </svg>
+                <span class="dropdown-name text-danger" (click)="onClickLogout()">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+
+<!--Guest Navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark" *ngIf="guestNavbarShow">
+  <div class="container">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <i class="fa fa-cube me-2"></i>
+      <span class="fw-bold fs-4">Shop3D</span>
+    </a>
+
+    <!-- Hamburger button for mobile -->
+    <button class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Left side menu items -->
+      <ul class="navbar-nav me-auto ml-4 mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link fs-5" routerLink="/products" aria-current="page">
+            <i class="fa fa-home me-1"></i> <span class="fs-6">Home</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right side menu items -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/wishlist">
+            <div class="d-flex align-items-center">
+              <div class="nav-icon-container">
+                <i class="fa fa-heart fs-5"></i>
+                <span class="badge rounded-pill">2</span>
+              </div>
+              <span class="d-lg-inline d-none ms-1 fs-6">Wishlist</span>
+            </div>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/cart">
+            <div class="d-flex align-items-center">
+              <div class="nav-icon-container">
+                <i class="fa fa-shopping-cart fs-5"></i>
+                <span class="badge rounded-pill">3</span>
+              </div>
+              <span class="d-lg-inline d-none ms-1 fs-6">Cart</span>
+            </div>
+          </a>
+        </li>
+
+        <li class="nav-item"><button class="btn btn-primary login-btn" routerLink="/login">Login</button></li>
+
+        <li class="nav-item"><button class="btn btn-success" routerLink="/signup">Signup</button></li>
+
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+
+
+
+
+
+<!--Admin Navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark" *ngIf="adminNavbarShow">
+  <div class="container">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <i class="fa fa-cube me-2"></i>
+      <span class="fw-bold fs-4">Shop3D</span>
+    </a>
+
+    <!-- Hamburger button for mobile -->
+    <button class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Left side menu items -->
+      <ul class="navbar-nav me-auto ml-4 mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link fs-5" routerLink="/products" aria-current="page">
+            <i class="fa fa-home me-1"></i> <span class="fs-6">Home</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right side menu items -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+        <li>
+          <button class="btn btn-success login-btn" routerLink="/add-product">+ Add New Product</button>
+        </li>
+
+        <li class="nav-item dropdown"
+            (mouseenter)="onHover()"
+            (mouseleave)="onMouseLeave()"
+            ng-mouseleave="showDropdown = false">
+          <a class="nav-link">
+            <i class="fa fa-user-circle me-1"></i>
+            <span class="d-lg-inline d-none profile-btn">Profile</span>
+          </a>
+          <ul class="dropdown-menu" [ngClass]="{ show: showDropdown }">
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="17"
+                     height="17"
+                     fill="currentColor"
+                     class="bi bi-person"
+                     viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                </svg>
+                <span class="dropdown-name">My Account</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center" routerLink="/update-user">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="16"
+                     height="16"
+                     fill="currentColor"
+                     class="bi bi-pencil-square"
+                     viewBox="0 0 16 16">
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                  <path fill-rule="evenodd"
+                        d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                </svg>
+                <span class="dropdown-name">Update Profile</span>
+              </a>
+            </li>
+
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item d-flex flex-row align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="16"
+                     height="16"
+                     fill="currentColor"
+                     class="bi bi-box-arrow-right text-danger"
+                     viewBox="0 0 16 16">
+                  <path fill-rule="evenodd"
+                        d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                  <path fill-rule="evenodd"
+                        d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+                </svg>
+                <span class="dropdown-name text-danger" (click)="onClickLogout()">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+          
