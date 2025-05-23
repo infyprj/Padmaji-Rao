@@ -8,21 +8,25 @@ CREATE TABLE Orders (
     ShippingState NVARCHAR(100),
     ShippingPostalCode NVARCHAR(20),
     ShippingCountry NVARCHAR(100),
-
+    Name NVARCHAR(100),
+    PhoneNumber NVARCHAR(20)
 );
 GO
-    INSERT INTO Orders (UserID, TotalAmount, ShippingAddress, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry)
+
+INSERT INTO Orders 
+    (UserID, TotalAmount, ShippingAddress, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry, Name, PhoneNumber)
 VALUES 
-(1, 150.75, '123 Main St', 'New York', 'NY', '10001', 'USA'),
-(2, 299.99, '456 Oak Ave', 'Los Angeles', 'CA', '90001', 'USA'),
-(3, 89.50, '789 Pine Rd', 'Chicago', 'IL', '60601', 'USA'),
-(4, 420.00, '101 Maple Blvd', 'Houston', 'TX', '77001', 'USA'),
-(5, 59.95, '202 Birch Ln', 'Phoenix', 'AZ', '85001', 'USA'),
-(1, 230.25, '123 Main St', 'New York', 'NY', '10001', 'USA'),
-(2, 199.99, '456 Oak Ave', 'Los Angeles', 'CA', '90001', 'USA'),
-(3, 320.10, '789 Pine Rd', 'Chicago', 'IL', '60601', 'USA'),
-(4, 150.00, '101 Maple Blvd', 'Houston', 'TX', '77001', 'USA'),
-(5, 75.00, '202 Birch Ln', 'Phoenix', 'AZ', '85001', 'USA');
+    (1, 150.75, '123 Main St', 'New Delhi', 'Delhi', '110001', 'India', 'Rajesh Kumar', '9876543210'),
+    (2, 299.99, '456 Oak Ave', 'Mumbai', 'Maharashtra', '400001', 'India', 'Anjali Sharma', '9123456789'),
+    (3, 89.50, '789 Pine Rd', 'Bengaluru', 'Karnataka', '560001', 'India', 'Vikram Singh', '9988776655'),
+    (4, 420.00, '101 Maple Blvd', 'Chennai', 'Tamil Nadu', '600001', 'India', 'Priya Patel', '9876501234'),
+    (5, 59.95, '202 Birch Ln', 'Kolkata', 'West Bengal', '700001', 'India', 'Amit Desai', '9567890123'),
+    (1, 230.25, '123 Main St', 'New Delhi', 'Delhi', '110001', 'India', 'Rajesh Kumar', '9876543210'),
+    (2, 199.99, '456 Oak Ave', 'Mumbai', 'Maharashtra', '400001', 'India', 'Anjali Sharma', '9123456789'),
+    (3, 320.10, '789 Pine Rd', 'Bengaluru', 'Karnataka', '560001', 'India', 'Vikram Singh', '9988776655'),
+    (4, 150.00, '101 Maple Blvd', 'Chennai', 'Tamil Nadu', '600001', 'India', 'Priya Patel', '9876501234'),
+    (5, 75.00, '202 Birch Ln', 'Kolkata', 'West Bengal', '700001', 'India', 'Amit Desai', '9567890123');
+
 
 -- Order Items Table
 CREATE TABLE OrderItems (
