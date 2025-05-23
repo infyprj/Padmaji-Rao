@@ -1,0 +1,65 @@
+Rating Table : (ratingId, userId, productId,rating)
+Address Table : (adderssId, userId, name, phoneNumber, address, city, state, postalCode, country)
+
+
+
+CREATE TABLE Rating (
+    ratingId INT PRIMARY KEY IDENTITY(1,1),
+    userId INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    productId INT NOT NULL FOREIGN KEY REFERENCES Products(ProductID),
+    rating INT CHECK (rating >= 1 AND rating <= 5)
+);
+GO
+
+INSERT INTO Rating (userId, productId, rating)
+VALUES
+    (1, 1, 5),
+    (2, 2, 4),
+    (3, 3, 3),
+    (1, 4, 4),
+    (2, 1, 2),
+    (3, 2, 5),
+    (4, 3, 1),
+    (5, 4, 3),
+    (4, 1, 4),
+    (5, 2, 5);
+
+
+
+
+
+CREATE TABLE Address (
+    addressId INT PRIMARY KEY IDENTITY(1,1),
+    userId INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    name NVARCHAR(100),
+    phoneNumber NVARCHAR(20),
+    address NVARCHAR(255),
+    city NVARCHAR(100),
+    state NVARCHAR(100),
+    postalCode NVARCHAR(20),
+    country NVARCHAR(100)
+);
+GO
+
+INSERT INTO Address (userId, name, phoneNumber, address, city, state, postalCode, country)
+VALUES
+    -- User 1 addresses
+    (1, 'Rajesh Kumar', '9876543210', '12 MG Road', 'Bengaluru', 'Karnataka', '560001', 'India'),
+    (1, 'Rajesh Kumar', '9876543210', '45 Residency Rd', 'Bengaluru', 'Karnataka', '560025', 'India'),
+
+    -- User 2 addresses
+    (2, 'Anjali Sharma', '9123456789', '34 Park Street', 'Kolkata', 'West Bengal', '700001', 'India'),
+    (2, 'Anjali Sharma', '9123456789', '78 Salt Lake', 'Kolkata', 'West Bengal', '700091', 'India'),
+
+    -- User 3 addresses
+    (3, 'Vikram Singh', '9988776655', '56 Nehru Nagar', 'Mumbai', 'Maharashtra', '400001', 'India'),
+    (3, 'Vikram Singh', '9988776655', '89 Bandra West', 'Mumbai', 'Maharashtra', '400050', 'India'),
+
+    -- User 4 addresses
+    (4, 'Priya Patel', '9876501234', '78 Marine Drive', 'Mumbai', 'Maharashtra', '400002', 'India'),
+    (4, 'Priya Patel', '9876501234', '23 Juhu Beach', 'Mumbai', 'Maharashtra', '400049', 'India'),
+
+    -- User 5 addresses
+    (5, 'Amit Desai', '9567890123', '90 Ashok Road', 'New Delhi', 'Delhi', '110001', 'India'),
+    (5, 'Amit Desai', '9567890123', '15 Connaught Place', 'New Delhi', 'Delhi', '110001', 'India');
+
