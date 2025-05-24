@@ -1,0 +1,234 @@
+CREATE PROCEDURE sp_PlaceOrder
+    @UserID INT,
+    @CartID INT,
+    @AddressID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @OrderID INT;
+    DECLARE @TotalAmount DECIMAL(18, 2) = 0;
+    DECLARE @CartItemCount INT = 0;
+    
+    -- Declare variables for address details
+    DECLARE @Name NVARCHAR(100);
+    DECLARE @PhoneNumber NVARCHAR(20);
+    DECLARE @Address NVARCHAR(255);
+    DECLARE @City NVARCHAR(100);
+    DECLARE @State NVARCHAR(100);
+    DECLARE @PostalCode NVARCHAR(20);
+    DECLARE @Country NVARCHAR(100);
+    DECLARE @UserRoleID INT;
+    
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        -- Validation 1: Check if user exists and get role
+        SELECT @UserRoleID = RoleID 
+        FROM Users 
+        WHERE UserID = @UserID;
+        
+        IF @UserRoleID IS NULL
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -1; -- User does not exist
+        END
+        
+        -- Validation 2: Check if user has permission to place orders (Customer or Admin role)
+        IF @UserRoleID NOT IN (2, 3) -- Assuming 2=Customer, 3=Admin based on your data
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -6; -- User does not have permission to place orders
+        END
+        
+        -- Validation 3: Check if cart exists and belongs to the user
+        IF NOT EXISTS (SELECT 1 FROM Carts WHERE CartID = @CartID AND UserID = @UserID)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -2; -- Cart does not exist or does not belong to user
+        END
+        
+        -- Validation 4: Check if address exists and belongs to the user
+        IF NOT EXISTS (SELECT 1 FROM Address WHERE addressId = @AddressID AND userId = @UserID)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -3; -- Address does not exist or does not belong to user
+        END
+        
+        -- Validation 5: Check if cart has items
+        SELECT @CartItemCount = COUNT(*)
+        FROM CartItems 
+        WHERE CartID = @CartID;
+        
+        IF @CartItemCount = 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -4; -- Cart is empty
+        END
+        
+        -- Validation 6: Check if all products in cart exist and are available
+        IF EXISTS (
+            SELECT 1 
+            FROM CartItems ci
+            LEFT JOIN Products p ON ci.ProductID = p.ProductID
+            WHERE ci.CartID = @CartID AND p.ProductID IS NULL
+        )
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -7; -- One or more products in cart no longer exist
+        END
+        
+        -- Critical Section: Lock products and check availability atomically
+        -- Use table hints to prevent race conditions
+        DECLARE @InsufficientStock TABLE (ProductID INT, RequestedQty INT, AvailableQty INT);
+        
+        INSERT INTO @InsufficientStock (ProductID, RequestedQty, AvailableQty)
+        SELECT ci.ProductID, ci.Quantity, p.Quantity
+        FROM CartItems ci WITH (HOLDLOCK)
+        JOIN Products p WITH (UPDLOCK, HOLDLOCK) ON ci.ProductID = p.ProductID
+        WHERE ci.CartID = @CartID AND p.Quantity < ci.Quantity;
+        
+        -- Check if any products have insufficient stock
+        IF EXISTS (SELECT 1 FROM @InsufficientStock)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            -- Return details about insufficient stock
+            SELECT 'Insufficient stock for the following products:' AS ErrorMessage,
+                   ProductID, RequestedQty, AvailableQty
+            FROM @InsufficientStock;
+            RETURN -5; -- Insufficient product quantity
+        END
+        
+        -- Calculate total amount with precision handling
+        SELECT @TotalAmount = CAST(SUM(CAST(p.Price AS DECIMAL(20,4)) * CAST(ci.Quantity AS DECIMAL(20,4))) AS DECIMAL(18,2))
+        FROM CartItems ci
+        JOIN Products p ON ci.ProductID = p.ProductID
+        WHERE ci.CartID = @CartID;
+        
+        -- Validation 7: Ensure total amount is reasonable (not zero or negative)
+        IF @TotalAmount <= 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -8; -- Invalid total amount
+        END
+        
+        -- Get address details
+        SELECT 
+            @Name = name,
+            @PhoneNumber = phoneNumber,
+            @Address = address,
+            @City = city,
+            @State = state,
+            @PostalCode = postalCode,
+            @Country = country
+        FROM Address 
+        WHERE addressId = @AddressID;
+        
+        -- Validation 8: Ensure address details are complete
+        IF @Name IS NULL OR @Address IS NULL OR @City IS NULL
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -9; -- Incomplete address information
+        END
+        
+        -- Create order record
+        INSERT INTO Orders (
+            UserID, 
+            TotalAmount, 
+            ShippingAddress, 
+            ShippingCity, 
+            ShippingState, 
+            ShippingPostalCode, 
+            ShippingCountry,
+            Name,
+            PhoneNumber
+        )
+        VALUES (
+            @UserID,
+            @TotalAmount,
+            @Address,
+            @City,
+            @State,
+            @PostalCode,
+            @Country,
+            @Name,
+            @PhoneNumber
+        );
+        
+        -- Get the newly created order ID
+        SET @OrderID = SCOPE_IDENTITY();
+        
+        -- Transfer cart items to order items
+        INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice, CustomizationDetails)
+        SELECT 
+            @OrderID,
+            ci.ProductID,
+            ci.Quantity,
+            p.Price,
+            NULL -- No customization details from cart
+        FROM CartItems ci
+        JOIN Products p ON ci.ProductID = p.ProductID
+        WHERE ci.CartID = @CartID;
+        
+        -- Update product quantities (reduce inventory) with final safety check
+        UPDATE p
+        SET Quantity = CASE 
+            WHEN p.Quantity >= ci.Quantity THEN p.Quantity - ci.Quantity
+            ELSE p.Quantity -- This should never happen due to earlier checks
+        END
+        FROM Products p
+        JOIN CartItems ci ON p.ProductID = ci.ProductID
+        WHERE ci.CartID = @CartID;
+        
+        -- Verify no negative quantities resulted (final safety check)
+        IF EXISTS (SELECT 1 FROM Products WHERE Quantity < 0)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -10; -- Inventory consistency error
+        END
+        
+        -- Clear cart items
+        DELETE FROM CartItems 
+        WHERE CartID = @CartID;
+        
+        COMMIT TRANSACTION;
+        
+        -- Return success with order ID and total
+        SELECT @OrderID AS OrderID, @TotalAmount AS TotalAmount, 'Order placed successfully' AS Message;
+        RETURN 1; -- Success
+        
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        
+        -- Log error details (in production, you might want to log to an error table)
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        
+        -- Return structured error information
+        SELECT 
+            'An error occurred while placing the order' AS ErrorMessage,
+            @ErrorMessage AS Details,
+            @ErrorLine AS ErrorLine;
+            
+        RETURN -99; -- General error
+    END CATCH
+END;
+GO
+
+-- Enhanced Return codes explanation:
+-- 1: Success
+-- -1: User does not exist
+-- -2: Cart does not exist or does not belong to user
+-- -3: Address does not exist or does not belong to user
+-- -4: Cart is empty
+-- -5: Insufficient product quantity
+-- -6: User does not have permission to place orders
+-- -7: One or more products in cart no longer exist
+-- -8: Invalid total amount
+-- -9: Incomplete address information
+-- -10: Inventory consistency error
+-- -99: General error
