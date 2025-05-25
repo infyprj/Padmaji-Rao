@@ -3,17 +3,24 @@ Infosys.Shop3DSolution
 |  |--Models
 |  |  |--Cart.cs
 |  |  |--CartItem.cs
+|  |  |--Category.cs
 |  |  |--Product.cs
+|  |  |--Role.cs
+|  |  |--SavedProduct.cs
+|  |  |--Shop3DContext.cs
 |  |  |--User.cs
 |  |--Shop3DDB.sql
 |  |--Shop3DRepository.cs
-|
 |--Infosys.Shop3D.WebServices
 |  |--Controllers
 |  |  |--CartController.cs
+|  |  |--CategoryController.cs
+|  |  |--SavedProductController.cs
 |  |  |--ProductController.cs
+|  |  |--UserController.cs
 |  |--Models
 |  |  |--User.cs
+|  |--Program.cs
 |--Infosys.Shop3DApp
 |  |--src
 |  |  |--app
