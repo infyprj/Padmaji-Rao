@@ -517,7 +517,7 @@ CREATE TABLE OrderItems (
     
 );
 GO
-    INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice, CustomizationDetails)
+    INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice)
 VALUES
 (1, 2, 1, 49.99),
 (3, 3, 2, 29.95),
@@ -703,7 +703,7 @@ BEGIN
         SET @OrderID = SCOPE_IDENTITY();
         
         -- Transfer cart items to order items
-        INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice, CustomizationDetails)
+        INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice)
         SELECT 
             @OrderID,
             ci.ProductID,
