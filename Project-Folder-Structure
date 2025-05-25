@@ -1,0 +1,33 @@
+Infosys.Shop3DSolution
+|--Infosys.Shop3D.DataAccessLayer
+|  |--Models
+|  |  |--Cart.cs
+|  |  |--CartItem.cs
+|  |  |--Product.cs
+|  |  |--User.cs
+|  |--Shop3DDB.sql
+|  |--Shop3DRepository.cs
+|
+|--Infosys.Shop3D.WebServices
+|  |--Controllers
+|  |  |--CartController.cs
+|  |  |--ProductController.cs
+|  |--Models
+|  |  |--User.cs
+|--Infosys.Shop3DApp
+|  |--src
+|  |  |--app
+|  |  |  |--login
+|  |  |  |  |--login-component.html
+|  |  |  |  |--login-component.css
+|  |  |  |  |--login-component.ts
+|  |  |  |--services
+|  |  |  |  |--product-serice
+|  |  |  |  |  |--product.service.ts
+|  |  |  |  |--cart-serice
+|  |  |  |  |  |--cart.service.ts
+|  |  |  |--app.module.ts
+|  |  |  |--app.routing.ts
+|  |  |  |--app.component.html
+|  |  |  |--app.component.css
+|  |  |  |--app.component.ts
