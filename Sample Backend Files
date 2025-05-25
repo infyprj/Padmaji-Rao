@@ -1,0 +1,69 @@
+
+//DAL Method
+#region GetAllProducts - Returns all products
+        public List<Product> GetAllProducts()
+        {
+            List<Product> products = new List<Product>();
+            try
+            {
+                products = (from product in context.Products select product).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                products = new List<Product>();
+            }
+            return products;
+        }
+        #endregion
+
+//Service Layer
+
+  [HttpGet]
+        public JsonResult GetAllProducts()
+        {
+            List<Product> products = new List<Product>();
+            try
+            {
+                products = repository.GetAllProducts();
+            }
+            catch (Exception )
+            {
+                products = null;
+            }
+            return Json(products);
+        }
+
+
+
+//In Frontend Service Class
+ getProducts(): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>('https://localhost:7195/api/Product/GetAllProducts').pipe(catchError(this.errorHandler));
+  }
+
+
+
+  errorHandler(error: HttpErrorResponse) {
+    console.log(error);
+    return throwError(error.message || 'ERROR');
+  }
+
+//In Component
+this._productService.getProductById(id).subscribe(
+      responseProductData => {
+        console.log("Product data received:", responseProductData);
+        this.product = responseProductData;
+        if (this.product) {
+          this.activeImageUrl = this.product.thumbnailUrl;
+          this.modelUrl = this.product.modelUrl || this.modelUrl;
+
+        }
+        this.loading = false;
+      },
+      responseProductError => {
+        this.errorMsg = responseProductError;
+        this.loading = false;
+        console.error("Error fetching product:", this.errorMsg);
+      },
+      () => { console.log('GetProductDetails method executed successfully'); }
+    );
