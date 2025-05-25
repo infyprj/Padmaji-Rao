@@ -126,48 +126,6 @@ VALUES
 ('Tokyo Curve Sectional', 'A contemporary five-seater sectional sofa with a gracefully curved design, perfect for spacious living areas. Upholstered in high-resilience foam and premium fabric for lasting comfort. The modular design allows flexible arrangement to suit any room layout.', 18000, 1, 'https://shop3dprojectaccount.blob.core.windows.net/3d-models/Sofa2.glb', 'https://shop3dprojectaccount.blob.core.windows.net/images/Sofa2.png', 10);
 
 
-CREATE TABLE Orders (
-    OrderID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
-    OrderDate DATETIME DEFAULT GETDATE(),
-    TotalAmount DECIMAL(18, 2) NOT NULL,
-    ShippingAddress NVARCHAR(255),
-    ShippingCity NVARCHAR(100),
-    ShippingState NVARCHAR(100),
-    ShippingPostalCode NVARCHAR(20),
-    ShippingCountry NVARCHAR(100),
-
-);
-GO
-    INSERT INTO Orders (UserID, TotalAmount, ShippingAddress, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry)
-VALUES 
-(1, 150.75, '123 Main St', 'New York', 'NY', '10001', 'USA'),
-(2, 299.99, '456 Oak Ave', 'Los Angeles', 'CA', '90001', 'USA'),
-(3, 89.50, '789 Pine Rd', 'Chicago', 'IL', '60601', 'USA'),
-(4, 420.00, '101 Maple Blvd', 'Houston', 'TX', '77001', 'USA'),
-(5, 59.95, '202 Birch Ln', 'Phoenix', 'AZ', '85001', 'USA'),
-(1, 230.25, '123 Main St', 'New York', 'NY', '10001', 'USA'),
-(2, 199.99, '456 Oak Ave', 'Los Angeles', 'CA', '90001', 'USA'),
-(3, 320.10, '789 Pine Rd', 'Chicago', 'IL', '60601', 'USA'),
-(4, 150.00, '101 Maple Blvd', 'Houston', 'TX', '77001', 'USA'),
-(5, 75.00, '202 Birch Ln', 'Phoenix', 'AZ', '85001', 'USA');
-
--- Order Items Table
-CREATE TABLE OrderItems (
-    OrderItemID INT PRIMARY KEY IDENTITY(1,1),
-    OrderID INT NOT NULL FOREIGN KEY REFERENCES Orders(OrderID) ON DELETE CASCADE,
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES Products(ProductID),
-    Quantity INT NOT NULL,
-    UnitPrice DECIMAL(18, 2) NOT NULL,
-    CustomizationDetails NVARCHAR(MAX)
-);
-GO
-    INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice, CustomizationDetails)
-VALUES
-(1, 2, 1, 49.99, 'Color: Red, Size: M'),
-(3, 3, 2, 29.95, NULL),
-(2, 5, 1, 99.00, 'Engraving: "Happy B-Day"'),
-(2, 1, 3, 19.99, NULL);
 
 
 	
@@ -515,3 +473,289 @@ BEGIN
     WHERE c.UserID = @UserID;
 END;
 GO
+
+
+
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    OrderDate DATETIME DEFAULT GETDATE(),
+    TotalAmount DECIMAL(18, 2) NOT NULL,
+    ShippingAddress NVARCHAR(255),
+    ShippingCity NVARCHAR(100),
+    ShippingState NVARCHAR(100),
+    ShippingPostalCode NVARCHAR(20),
+    ShippingCountry NVARCHAR(100),
+    Name NVARCHAR(100),
+    PhoneNumber NVARCHAR(20)
+);
+GO
+
+INSERT INTO Orders 
+    (UserID, TotalAmount, ShippingAddress, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry, Name, PhoneNumber)
+VALUES 
+    (1, 150.75, '123 Main St', 'New Delhi', 'Delhi', '110001', 'India', 'Rajesh Kumar', '9876543210'),
+    (2, 299.99, '456 Oak Ave', 'Mumbai', 'Maharashtra', '400001', 'India', 'Anjali Sharma', '9123456789'),
+    (3, 89.50, '789 Pine Rd', 'Bengaluru', 'Karnataka', '560001', 'India', 'Vikram Singh', '9988776655'),
+    (4, 420.00, '101 Maple Blvd', 'Chennai', 'Tamil Nadu', '600001', 'India', 'Priya Patel', '9876501234'),
+    (5, 59.95, '202 Birch Ln', 'Kolkata', 'West Bengal', '700001', 'India', 'Amit Desai', '9567890123'),
+    (1, 230.25, '123 Main St', 'New Delhi', 'Delhi', '110001', 'India', 'Rajesh Kumar', '9876543210'),
+    (2, 199.99, '456 Oak Ave', 'Mumbai', 'Maharashtra', '400001', 'India', 'Anjali Sharma', '9123456789'),
+    (3, 320.10, '789 Pine Rd', 'Bengaluru', 'Karnataka', '560001', 'India', 'Vikram Singh', '9988776655'),
+    (4, 150.00, '101 Maple Blvd', 'Chennai', 'Tamil Nadu', '600001', 'India', 'Priya Patel', '9876501234'),
+    (5, 75.00, '202 Birch Ln', 'Kolkata', 'West Bengal', '700001', 'India', 'Amit Desai', '9567890123');
+
+
+-- Order Items Table
+CREATE TABLE OrderItems (
+    OrderItemID INT PRIMARY KEY IDENTITY(1,1),
+    OrderID INT NOT NULL FOREIGN KEY REFERENCES Orders(OrderID) ON DELETE CASCADE,
+    ProductID INT NOT NULL FOREIGN KEY REFERENCES Products(ProductID),
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(18, 2) NOT NULL,
+    
+);
+GO
+    INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice, CustomizationDetails)
+VALUES
+(1, 2, 1, 49.99),
+(3, 3, 2, 29.95),
+(2, 5, 1, 99.00),
+(2, 1, 3, 19.99);
+Go
+
+
+CREATE TABLE Rating (
+    ratingId INT PRIMARY KEY IDENTITY(1,1),
+    userId INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    productId INT NOT NULL FOREIGN KEY REFERENCES Products(ProductID),
+    rating INT CHECK (rating >= 1 AND rating <= 5)
+);
+GO
+
+INSERT INTO Rating (userId, productId, rating)
+VALUES
+    (1, 1, 5),
+    (2, 2, 4),
+    (3, 3, 3),
+    (1, 4, 4),
+    (2, 1, 2),
+    (3, 2, 5),
+    (4, 3, 1),
+    (5, 4, 3),
+    (4, 1, 4),
+    (5, 2, 5);
+
+GO
+
+
+CREATE TABLE Address (
+    addressId INT PRIMARY KEY IDENTITY(1,1),
+    userId INT NOT NULL FOREIGN KEY REFERENCES Users(UserID),
+    name NVARCHAR(100),
+    phoneNumber NVARCHAR(20),
+    address NVARCHAR(255),
+    city NVARCHAR(100),
+    state NVARCHAR(100),
+    postalCode NVARCHAR(20),
+    country NVARCHAR(100)
+);
+GO
+
+INSERT INTO Address (userId, name, phoneNumber, address, city, state, postalCode, country)
+VALUES
+    -- User 1 addresses
+    (1, 'Rajesh Kumar', '9876543210', '12 MG Road', 'Bengaluru', 'Karnataka', '560001', 'India'),
+    (1, 'Rajesh Kumar', '9876543210', '45 Residency Rd', 'Bengaluru', 'Karnataka', '560025', 'India'),
+
+    -- User 2 addresses
+    (2, 'Anjali Sharma', '9123456789', '34 Park Street', 'Kolkata', 'West Bengal', '700001', 'India'),
+    (2, 'Anjali Sharma', '9123456789', '78 Salt Lake', 'Kolkata', 'West Bengal', '700091', 'India'),
+
+    -- User 3 addresses
+    (3, 'Vikram Singh', '9988776655', '56 Nehru Nagar', 'Mumbai', 'Maharashtra', '400001', 'India'),
+    (3, 'Vikram Singh', '9988776655', '89 Bandra West', 'Mumbai', 'Maharashtra', '400050', 'India'),
+
+    -- User 4 addresses
+    (4, 'Priya Patel', '9876501234', '78 Marine Drive', 'Mumbai', 'Maharashtra', '400002', 'India'),
+    (4, 'Priya Patel', '9876501234', '23 Juhu Beach', 'Mumbai', 'Maharashtra', '400049', 'India'),
+
+    -- User 5 addresses
+    (5, 'Amit Desai', '9567890123', '90 Ashok Road', 'New Delhi', 'Delhi', '110001', 'India'),
+    (5, 'Amit Desai', '9567890123', '15 Connaught Place', 'New Delhi', 'Delhi', '110001', 'India');
+
+Go
+
+
+
+CREATE PROCEDURE sp_PlaceOrder
+    @UserID INT,
+    @CartID INT,
+    @AddressID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @OrderID INT;
+    DECLARE @TotalAmount DECIMAL(18, 2) = 0;
+    DECLARE @CartItemCount INT = 0;
+    
+    -- Declare variables for address details
+    DECLARE @Name NVARCHAR(100);
+    DECLARE @PhoneNumber NVARCHAR(20);
+    DECLARE @Address NVARCHAR(255);
+    DECLARE @City NVARCHAR(100);
+    DECLARE @State NVARCHAR(100);
+    DECLARE @PostalCode NVARCHAR(20);
+    DECLARE @Country NVARCHAR(100);
+    
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        -- Validation 1: Check if user exists
+        IF NOT EXISTS (SELECT 1 FROM Users WHERE UserID = @UserID)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -1; -- User does not exist
+        END
+        
+        -- Validation 2: Check if cart exists and belongs to the user
+        IF NOT EXISTS (SELECT 1 FROM Carts WHERE CartID = @CartID AND UserID = @UserID)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -2; -- Cart does not exist or does not belong to user
+        END
+        
+        -- Validation 3: Check if address exists and belongs to the user
+        IF NOT EXISTS (SELECT 1 FROM Address WHERE addressId = @AddressID AND userId = @UserID)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -3; -- Address does not exist or does not belong to user
+        END
+        
+        -- Validation 4: Check if cart has items
+        SELECT @CartItemCount = COUNT(*)
+        FROM CartItems 
+        WHERE CartID = @CartID;
+        
+        IF @CartItemCount = 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -4; -- Cart is empty
+        END
+        
+        -- Validation 5: Check product availability and calculate total amount
+        IF EXISTS (
+            SELECT 1 
+            FROM CartItems ci
+            JOIN Products p ON ci.ProductID = p.ProductID
+            WHERE ci.CartID = @CartID AND p.Quantity < ci.Quantity
+        )
+        BEGIN
+            ROLLBACK TRANSACTION;
+            RETURN -5; -- Insufficient product quantity
+        END
+        
+        -- Calculate total amount
+        SELECT @TotalAmount = SUM(p.Price * ci.Quantity)
+        FROM CartItems ci
+        JOIN Products p ON ci.ProductID = p.ProductID
+        WHERE ci.CartID = @CartID;
+        
+        -- Get address details
+        SELECT 
+            @Name = name,
+            @PhoneNumber = phoneNumber,
+            @Address = address,
+            @City = city,
+            @State = state,
+            @PostalCode = postalCode,
+            @Country = country
+        FROM Address 
+        WHERE addressId = @AddressID;
+        
+        -- Create order record
+        INSERT INTO Orders (
+            UserID, 
+            TotalAmount, 
+            ShippingAddress, 
+            ShippingCity, 
+            ShippingState, 
+            ShippingPostalCode, 
+            ShippingCountry,
+            Name,
+            PhoneNumber
+        )
+        VALUES (
+            @UserID,
+            @TotalAmount,
+            @Address,
+            @City,
+            @State,
+            @PostalCode,
+            @Country,
+            @Name,
+            @PhoneNumber
+        );
+        
+        -- Get the newly created order ID
+        SET @OrderID = SCOPE_IDENTITY();
+        
+        -- Transfer cart items to order items
+        INSERT INTO OrderItems (OrderID, ProductID, Quantity, UnitPrice, CustomizationDetails)
+        SELECT 
+            @OrderID,
+            ci.ProductID,
+            ci.Quantity,
+            p.Price,
+        FROM CartItems ci
+        JOIN Products p ON ci.ProductID = p.ProductID
+        WHERE ci.CartID = @CartID;
+        
+        -- Update product quantities (reduce inventory)
+        UPDATE p
+        SET Quantity = p.Quantity - ci.Quantity
+        FROM Products p
+        JOIN CartItems ci ON p.ProductID = ci.ProductID
+        WHERE ci.CartID = @CartID;
+        
+        -- Clear cart items
+        DELETE FROM CartItems 
+        WHERE CartID = @CartID;
+        
+        COMMIT TRANSACTION;
+        
+        -- Return success with order ID
+        SELECT @OrderID AS OrderID, 'Order placed successfully' AS Message;
+        RETURN 1; -- Success
+        
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        
+        -- Return error information
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+        RETURN -99; -- General error
+    END CATCH
+END;
+GO
+
+-- Return codes explanation:
+-- 1: Success
+-- -1: User does not exist
+-- -2: Cart does not exist or does not belong to user
+-- -3: Address does not exist or does not belong to user
+-- -4: Cart is empty
+-- -5: Insufficient product quantity
+-- -99: General error
+
+-- Example usage:
+-- DECLARE @Result INT;
+-- EXEC @Result = sp_PlaceOrder @UserID = 1, @CartID = 1, @AddressID = 1;
+-- SELECT @Result AS ReturnCode;
+
