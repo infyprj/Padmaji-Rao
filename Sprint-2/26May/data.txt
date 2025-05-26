@@ -61,3 +61,13 @@ addRating(ratingRequest: IRatingRequest): Observable<boolean> {
     return this.http.post<boolean>('https://localhost:7195/api/Rating/AddRating', ratingRequest)
       .pipe(catchError(this.errorHandler));
   }
+
+
+
+
+export interface IRatingRequest {
+  userId: number;
+  productId: number;
+  rating: number;
+}
+
