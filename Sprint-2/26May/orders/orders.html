@@ -1,0 +1,168 @@
+<div class="orders-container">
+  <div class="page-header">
+    <h1 class="page-title">My Orders</h1>
+    <p class="page-subtitle">Track and manage your orders</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isOrdersLoading || isOrderItemsLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading your orders...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMsg && !isOrdersLoading && !isOrderItemsLoading" class="error-container">
+    <div class="error-message">
+      <i class="error-icon">⚠️</i>
+      <p>{{ errorMsg }}</p>
+    </div>
+  </div>
+
+  <!-- Orders List -->
+  <div *ngIf="!isOrdersLoading && !isOrderItemsLoading && orders.length > 0" class="orders-list">
+    <div *ngFor="let order of orders" class="order-card">
+      <!-- Order Header -->
+      <div class="order-header">
+        <div class="order-info-section">
+          <div class="order-date-section">
+            <span class="info-label">Order Placed On</span>
+            <span class="info-value">{{ formatDate(order.orderDate) }}</span>
+          </div>
+        </div>
+        
+        <div class="order-info-section">
+          <div class="order-total-section">
+            <span class="info-label">Total</span>
+            <span class="info-value total-amount">{{ formatPrice(order.totalAmount) }}</span>
+          </div>
+        </div>
+        
+        <div class="order-info-section">
+          <div class="shipping-section">
+            <span class="info-label">Shipped To</span>
+            <div class="shipped-to-container">
+              <span class="info-value shipping-name">{{ order.name }}</span>
+              <div class="address-tooltip">
+                <div class="tooltip-content">
+                  <div class="address-details">
+                    <h4>{{ order.name }}</h4>
+                    <p>{{ getFullAddress(order) }}</p>
+                    <p class="phone-number">📞 {{ order.phoneNumber }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="order-items">
+        <div *ngFor="let item of getOrderItems(order.orderId)" class="order-item">
+          <div class="item-image">
+            <img [src]="item.thumbnailUrl" [alt]="item.productName" class="product-thumbnail">
+          </div>
+          
+          <div class="item-details">
+            <h3 class="product-name">{{ item.productName }}</h3>
+            <div class="item-meta">
+              <span class="quantity">Qty: {{ item.quantity }}</span>
+              <span class="unit-price">{{ formatPrice(item.unitPrice) }}</span>
+            </div>
+            <div class="item-actions">
+              <button 
+                class="action-btn rate-btn" 
+                (click)="onRateProduct(item.productId, item.productName)"
+                type="button">
+                <span class="btn-icon">⭐</span>
+                Rate Product
+              </button>
+              <button 
+                class="action-btn review-btn" 
+                (click)="onReviewProduct(item.productId)"
+                type="button">
+                <span class="btn-icon">✍️</span>
+                Review Product
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isOrdersLoading && !isOrderItemsLoading && orders.length === 0 && !errorMsg" class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h2>No Orders Yet</h2>
+    <p>When you place your first order, it will appear here.</p>
+    <button class="shop-now-btn" type="button">Start Shopping</button>
+  </div>
+
+  <!-- Rating Modal -->
+  <div *ngIf="showRatingModal" class="modal-overlay" (click)="closeRatingModal()">
+    <div class="rating-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Rate This Product</h2>
+        <button class="close-btn" (click)="closeRatingModal()" type="button">×</button>
+      </div>
+      
+      <div class="modal-content">
+        <div class="product-info">
+          <h3 class="product-name-modal">{{ currentProductName }}</h3>
+          <p class="rating-subtitle">How would you rate this product?</p>
+        </div>
+
+        <div class="rating-section">
+          <div class="stars-container">
+            <button 
+              *ngFor="let star of [1,2,3,4,5]" 
+              class="star-btn"
+              [class.selected]="star <= selectedRating"
+              [class.hover]="star <= selectedRating"
+              (click)="selectRating(star)"
+              (mouseenter)="selectRating(star)"
+              type="button">
+              ⭐
+            </button>
+          </div>
+          <div class="rating-text">
+            <span *ngIf="selectedRating === 1" class="rating-label poor">Poor</span>
+            <span *ngIf="selectedRating === 2" class="rating-label fair">Fair</span>
+            <span *ngIf="selectedRating === 3" class="rating-label good">Good</span>
+            <span *ngIf="selectedRating === 4" class="rating-label very-good">Very Good</span>
+            <span *ngIf="selectedRating === 5" class="rating-label excellent">Excellent</span>
+          </div>
+        </div>
+
+        <div *ngIf="ratingError" class="error-message-modal">
+          {{ ratingError }}
+        </div>
+
+        <div *ngIf="ratingSubmitted" class="success-message">
+          <div class="success-icon">✅</div>
+          <p>Thank you for your rating!</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          class="cancel-btn" 
+          (click)="closeRatingModal()"
+          [disabled]="isSubmittingRating"
+          type="button">
+          Cancel
+        </button>
+        <button 
+          class="submit-rating-btn" 
+          (click)="submitRating()"
+          [disabled]="selectedRating === 0 || isSubmittingRating || ratingSubmitted"
+          type="button">
+          <span *ngIf="isSubmittingRating" class="loading-spinner"></span>
+          <span *ngIf="!isSubmittingRating && !ratingSubmitted">Submit Rating</span>
+          <span *ngIf="ratingSubmitted">Submitted</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
