@@ -1,1 +1,55 @@
+//order.service.ts
+getOrderItemsByUserId(userId: number): Observable<IOrderItem[]> {
+    return this.http.get<IOrderItem[]>(`https://localhost:7195/api/Order/GetOrderItemsByUserId/${userId}`)
+      .pipe(catchError(this.errorHandler));
+  }
 
+  getOrderDetailsByUserId(userId: number): Observable<IOrder[]> {
+    return this.http.get<IOrder[]>(`https://localhost:7195/api/Order/GetOrderDetailsByUserId/${userId}`)
+      .pipe(catchError(this.errorHandler));
+  }
+
+export interface IOrder {
+  orderId: number;
+  userId: number;
+  orderDate: Date;
+  totalAmount: number;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingPostalCode: string;
+  shippingCountry: string;
+  name: string;
+  phoneNumber: string;
+}
+
+
+export interface IOrderItem {
+  orderItemId: number;
+  orderId: number;
+  productId: number;
+  productName: string;
+  thumbnailUrl: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+
+
+//example way of using cart.service
+this._cartService.getCartItems().subscribe(
+      responseData => {
+        if (responseData.length > 0) {
+          this.cartItems = responseData;
+          this.calculateTotals();
+        } else {
+          this.errorMsg="No Cart Items found for User"
+        }
+        this.isCartItemsLoading = false;
+      },
+      responseError => {
+        this.errorMsg = responseError;
+        console.log("Error in Getting Cart Items of the user" + responseError);
+        this.isCartItemsLoading = false;
+      }
+    )
