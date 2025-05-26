@@ -36,7 +36,7 @@ export interface IOrderItem {
 
 
 
-//example way of using cart.service
+//example way of using service method from cart.service
 this._cartService.getCartItems().subscribe(
       responseData => {
         if (responseData.length > 0) {
