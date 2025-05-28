@@ -1,0 +1,478 @@
+<!-- Address Modal -->
+<div class="modal-overlay" *ngIf="showAddressModal" (click)="closeAddressModal()">
+  <div class="modal-content address-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ isEditMode ? 'Edit Address' : 'Add New Address' }}</h3>
+      <button class="btn-close" (click)="closeAddressModal()">
+        <i class="icon-close"></i>
+      </button>
+    </div>
+    <form class="address-form" #addressFormRef="ngForm" (ngSubmit)="saveAddress()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Full Name *</label>
+          <input type="text"
+                 id="name"
+                 [(ngModel)]="addressForm.name"
+                 name="name"
+                 #nameField="ngModel"
+                 required
+                 minlength="2"
+                 maxlength="50"
+                 pattern="^[a-zA-Z\s]+$"
+                 class="form-input"
+                 [class.error]="nameField.invalid && nameField.touched"
+                 [class.success]="nameField.valid && nameField.touched">
+          <div class="validation-messages" *ngIf="nameField.invalid && nameField.touched">
+            <span class="error-message" *ngIf="nameField.errors?.['required']">
+              <i class="icon-error"></i>Full name is required
+            </span>
+            <span class="error-message" *ngIf="nameField.errors?.['minlength']">
+              <i class="icon-error"></i>Name must be at least 2 characters
+            </span>
+            <span class="error-message" *ngIf="nameField.errors?.['maxlength']">
+              <i class="icon-error"></i>Name cannot exceed 50 characters
+            </span>
+            <span class="error-message" *ngIf="nameField.errors?.['pattern']">
+              <i class="icon-error"></i>Name can only contain letters and spaces
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel"
+                 id="phone"
+                 [(ngModel)]="addressForm.phoneNumber"
+                 name="phone"
+                 #phoneField="ngModel"
+                 required
+                 pattern="^[0-9]{10}$"
+                 maxlength="10"
+                 class="form-input"
+                 [class.error]="phoneField.invalid && phoneField.touched"
+                 [class.success]="phoneField.valid && phoneField.touched"
+                 placeholder="Enter 10-digit phone number">
+          <div class="validation-messages" *ngIf="phoneField.invalid && phoneField.touched">
+            <span class="error-message" *ngIf="phoneField.errors?.['required']">
+              <i class="icon-error"></i>Phone number is required
+            </span>
+            <span class="error-message" *ngIf="phoneField.errors?.['pattern']">
+              <i class="icon-error"></i>Please enter a valid 10-digit phone number
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="address">Address *</label>
+        <textarea id="address"
+                  [(ngModel)]="addressForm.addressLine"
+                  name="address"
+                  #addressField="ngModel"
+                  required
+                  minlength="10"
+                  maxlength="200"
+                  class="form-textarea"
+                  [class.error]="addressField.invalid && addressField.touched"
+                  [class.success]="addressField.valid && addressField.touched"
+                  rows="3"
+                  placeholder="Enter your complete address"></textarea>
+        <div class="validation-messages" *ngIf="addressField.invalid && addressField.touched">
+          <span class="error-message" *ngIf="addressField.errors?.['required']">
+            <i class="icon-error"></i>Address is required
+          </span>
+          <span class="error-message" *ngIf="addressField.errors?.['minlength']">
+            <i class="icon-error"></i>Address must be at least 10 characters
+          </span>
+          <span class="error-message" *ngIf="addressField.errors?.['maxlength']">
+            <i class="icon-error"></i>Address cannot exceed 200 characters
+          </span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">City *</label>
+          <input type="text"
+                 id="city"
+                 [(ngModel)]="addressForm.city"
+                 name="city"
+                 #cityField="ngModel"
+                 required
+                 minlength="2"
+                 maxlength="50"
+                 pattern="^[a-zA-Z\s]+$"
+                 class="form-input"
+                 [class.error]="cityField.invalid && cityField.touched"
+                 [class.success]="cityField.valid && cityField.touched">
+          <div class="validation-messages" *ngIf="cityField.invalid && cityField.touched">
+            <span class="error-message" *ngIf="cityField.errors?.['required']">
+              <i class="icon-error"></i>City is required
+            </span>
+            <span class="error-message" *ngIf="cityField.errors?.['minlength']">
+              <i class="icon-error"></i>City must be at least 2 characters
+            </span>
+            <span class="error-message" *ngIf="cityField.errors?.['pattern']">
+              <i class="icon-error"></i>City can only contain letters and spaces
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="state">State *</label>
+          <input type="text"
+                 id="state"
+                 [(ngModel)]="addressForm.state"
+                 name="state"
+                 #stateField="ngModel"
+                 required
+                 minlength="2"
+                 maxlength="50"
+                 pattern="^[a-zA-Z\s]+$"
+                 class="form-input"
+                 [class.error]="stateField.invalid && stateField.touched"
+                 [class.success]="stateField.valid && stateField.touched">
+          <div class="validation-messages" *ngIf="stateField.invalid && stateField.touched">
+            <span class="error-message" *ngIf="stateField.errors?.['required']">
+              <i class="icon-error"></i>State is required
+            </span>
+            <span class="error-message" *ngIf="stateField.errors?.['minlength']">
+              <i class="icon-error"></i>State must be at least 2 characters
+            </span>
+            <span class="error-message" *ngIf="stateField.errors?.['pattern']">
+              <i class="icon-error"></i>State can only contain letters and spaces
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="postalCode">Postal Code *</label>
+          <input type="text"
+                 id="postalCode"
+                 [(ngModel)]="addressForm.postalCode"
+                 name="postalCode"
+                 #postalCodeField="ngModel"
+                 required
+                 pattern="^[0-9]{6}$"
+                 maxlength="6"
+                 class="form-input"
+                 [class.error]="postalCodeField.invalid && postalCodeField.touched"
+                 [class.success]="postalCodeField.valid && postalCodeField.touched"
+                 placeholder="Enter 6-digit postal code">
+          <div class="validation-messages" *ngIf="postalCodeField.invalid && postalCodeField.touched">
+            <span class="error-message" *ngIf="postalCodeField.errors?.['required']">
+              <i class="icon-error"></i>Postal code is required
+            </span>
+            <span class="error-message" *ngIf="postalCodeField.errors?.['pattern']">
+              <i class="icon-error"></i>Please enter a valid 6-digit postal code
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="country">Country *</label>
+          <input type="text"
+                 id="country"
+                 [(ngModel)]="addressForm.country"
+                 name="country"
+                 #countryField="ngModel"
+                 required
+                 minlength="2"
+                 maxlength="50"
+                 pattern="^[a-zA-Z\s]+$"
+                 class="form-input"
+                 [class.error]="countryField.invalid && countryField.touched"
+                 [class.success]="countryField.valid && countryField.touched">
+          <div class="validation-messages" *ngIf="countryField.invalid && countryField.touched">
+            <span class="error-message" *ngIf="countryField.errors?.['required']">
+              <i class="icon-error"></i>Country is required
+            </span>
+            <span class="error-message" *ngIf="countryField.errors?.['minlength']">
+              <i class="icon-error"></i>Country must be at least 2 characters
+            </span>
+            <span class="error-message" *ngIf="countryField.errors?.['pattern']">
+              <i class="icon-error"></i>Country can only contain letters and spaces
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeAddressModal()">
+          Cancel
+        </button>
+        <button type="submit" 
+                class="btn-save" 
+                [disabled]="addressFormRef.invalid"
+                [class.disabled]="addressFormRef.invalid">
+          {{ isEditMode ? 'Update Address' : 'Save Address' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+/* Enhanced Modal Styles with Professional Validation */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content.address-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.btn-close:hover {
+  background-color: #f3f4f6;
+}
+
+.address-form {
+  padding: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input.success,
+.form-textarea.success {
+  border-color: #10b981;
+  background-color: #f0fdf4;
+}
+
+.form-input.error,
+.form-textarea.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.validation-messages {
+  margin-top: 6px;
+  min-height: 20px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 500;
+  animation: slideDown 0.2s ease-out;
+}
+
+.icon-error::before {
+  content: "⚠";
+  font-size: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 120px;
+}
+
+.btn-cancel {
+  background: #f9fafb;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-save:disabled,
+.btn-save.disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .modal-content.address-modal {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .address-form {
+    padding: 16px;
+  }
+  
+  .modal-header {
+    padding: 16px 16px 12px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-cancel,
+  .btn-save {
+    width: 100%;
+  }
+}
+
+/* Focus indicators for accessibility */
+.form-input:focus-visible,
+.form-textarea:focus-visible,
+.btn-cancel:focus-visible,
+.btn-save:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Success state styling */
+.form-input.success::after,
+.form-textarea.success::after {
+  content: "✓";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #10b981;
+  font-weight: bold;
+}
+</style>
