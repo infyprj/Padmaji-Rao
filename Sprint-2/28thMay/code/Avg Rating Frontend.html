@@ -1,0 +1,359 @@
+<!-- Product Title and Rating Section -->
+<div class="product-header">
+  <h1 class="product-title mb-3">{{ product.name }}</h1>
+  
+  <!-- Professional Rating Display -->
+  <div class="rating-container" *ngIf="productRating">
+    <div class="rating-summary">
+      <!-- Average Rating Number -->
+      <span class="rating-value">{{ productRating.AverageRating }}</span>
+      <span class="rating-separator">/</span>
+      <span class="rating-max">5</span>
+      
+      <!-- Star Rating Display -->
+      <div class="stars-container">
+        <div class="stars-background">
+          <i class="star-icon" *ngFor="let star of [1,2,3,4,5]">★</i>
+        </div>
+        <div class="stars-filled" [style.width.%]="getStarPercentage()">
+          <i class="star-icon filled" *ngFor="let star of [1,2,3,4,5]">★</i>
+        </div>
+      </div>
+      
+      <!-- Total Ratings Count -->
+      <span class="rating-count">({{ productRating.TotalUsers }})</span>
+    </div>
+    
+    <!-- Additional Rating Info -->
+    <div class="rating-details">
+      <span class="rating-label">
+        {{ productRating.TotalUsers === 1 ? 'rating' : 'ratings' }}
+      </span>
+    </div>
+  </div>
+  
+  <!-- Loading State -->
+  <div class="rating-loading" *ngIf="!productRating && !ratingError">
+    <div class="skeleton-rating">
+      <div class="skeleton-text skeleton-number"></div>
+      <div class="skeleton-stars"></div>
+      <div class="skeleton-text skeleton-count"></div>
+    </div>
+  </div>
+  
+  <!-- No Rating State -->
+  <div class="no-rating" *ngIf="ratingError || (productRating && productRating.TotalUsers === 0)">
+    <div class="stars-container">
+      <div class="stars-background">
+        <i class="star-icon" *ngFor="let star of [1,2,3,4,5]">★</i>
+      </div>
+    </div>
+    <span class="no-rating-text">No ratings yet</span>
+  </div>
+</div>
+
+<style>
+/* Product Header Styling */
+.product-header {
+  margin-bottom: 24px;
+}
+
+.product-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+/* Rating Container */
+.rating-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Rating Value Styling */
+.rating-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.rating-separator {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+}
+
+.rating-max {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Star Rating Styling */
+.stars-container {
+  position: relative;
+  display: inline-flex;
+  margin: 0 4px;
+}
+
+.stars-background,
+.stars-filled {
+  display: flex;
+  gap: 1px;
+}
+
+.stars-background {
+  color: #e5e7eb;
+}
+
+.stars-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  color: #fbbf24;
+  transition: width 0.3s ease;
+}
+
+.star-icon {
+  font-size: 16px;
+  font-style: normal;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.star-icon.filled {
+  color: #fbbf24;
+}
+
+/* Rating Count */
+.rating-count {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* Rating Details */
+.rating-details {
+  margin-left: 2px;
+}
+
+.rating-label {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Loading State */
+.rating-loading {
+  display: flex;
+  align-items: center;
+}
+
+.skeleton-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skeleton-text,
+.skeleton-stars {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-number {
+  width: 35px;
+  height: 20px;
+}
+
+.skeleton-stars {
+  width: 85px;
+  height: 16px;
+}
+
+.skeleton-count {
+  width: 40px;
+  height: 16px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* No Rating State */
+.no-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.no-rating-text {
+  font-size: 14px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Hover Effects */
+.rating-summary:hover .stars-filled {
+  color: #f59e0b;
+}
+
+.rating-summary:hover .rating-value {
+  color: #f59e0b;
+  transition: color 0.2s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-title {
+    font-size: 24px;
+  }
+  
+  .rating-value {
+    font-size: 16px;
+  }
+  
+  .star-icon {
+    font-size: 14px;
+  }
+  
+  .rating-summary {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-title {
+    font-size: 22px;
+    line-height: 1.4;
+  }
+  
+  .rating-summary {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  
+  .rating-count {
+    font-size: 13px;
+  }
+}
+
+/* Accessibility */
+.rating-container[aria-label]::before {
+  content: attr(aria-label);
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .stars-background {
+    color: #666;
+  }
+  
+  .stars-filled {
+    color: #000;
+  }
+  
+  .rating-value {
+    color: #000;
+  }
+}
+
+/* Enhanced styling for premium look */
+.rating-container {
+  padding: 2px 0;
+  border-radius: 4px;
+}
+
+.rating-summary {
+  position: relative;
+}
+
+.rating-summary::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(251, 191, 36, 0.2) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rating-summary:hover::after {
+  opacity: 1;
+}
+</style>
+
+<!-- TypeScript Component Code -->
+<script>
+// Interface for Rating Response
+export interface IRatingResponse {
+  ProductId: number;
+  AverageRating: number;
+  TotalUsers: number;
+}
+
+// Add these properties to your component class
+export class ProductDetailsComponent {
+  productRating: IRatingResponse | null = null;
+  ratingError: string = '';
+
+  // Call this method in ngOnInit or when product is loaded
+  getProductRating(productId: number) {
+    console.log("Fetching product rating for ID:", productId);
+    this._ratingService.getAvgRating(productId).subscribe(
+      (responseRatingData: IRatingResponse) => {
+        console.log("Product rating received:", responseRatingData);
+        this.productRating = responseRatingData;
+      },
+      responseRatingError => {
+        this.ratingError = responseRatingError;
+        console.error("Error fetching rating:", this.ratingError);
+      },
+      () => { 
+        console.log('GetProductRating method executed successfully'); 
+      }
+    );
+  }
+
+  // Helper method to calculate star fill percentage
+  getStarPercentage(): number {
+    if (!this.productRating) return 0;
+    return (this.productRating.AverageRating / 5) * 100;
+  }
+
+  // Call this method in ngOnInit after getting product
+  ngOnInit() {
+    // ... your existing code
+    if (this.product && this.product.id) {
+      this.getProductRating(this.product.id);
+    }
+  }
+}
+</script>
