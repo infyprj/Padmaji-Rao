@@ -1,109 +1,16 @@
- #region AddRating - Adds or updates a rating for a product by user
-        public bool AddRating(int userId, int productId, int rating)
-        {
-            try
-            {
-                var existingRating = context.Ratings.FirstOrDefault(r => r.UserId == userId && r.ProductId == productId);
+<h1 class="product-title mb-3">{{ product.name }}</h1>
 
-                if (existingRating != null)
-                {
-                    // Update existing rating
-                    existingRating.RatingValue = rating;
-                }
-                else
-                {
-                    // Add new rating
-                    var newRating = new Rating
-                    {
-                        UserId = userId,
-                        ProductId = productId,
-                        RatingValue = rating
-                    };
-                    context.Ratings.Add(newRating);
-                }
-
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-        }
-        #endregion
-
-
-
-
-
-using Infosys.Shop3D.DataAccessLayer;
-using Infosys.Shop3D.DataAccessLayer.Models;
-using Infosys.Shop3D.WebServices.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Infosys.Shop3D.WebServices.Controllers
-{
-    [Route("api/[controller]/[action]")]
-    [ApiController]
-    public class RatingController : Controller
-    {
-        public Shop3DRepository repository;
-        public RatingController(Shop3DRepository repository)
-        {
-            this.repository = repository;
-        }
-
-        [HttpPost]
-        public JsonResult AddRating([FromBody] Models.RatingRequest request)
-        {
-            bool result = false;
-            try
-            {
-                result = repository.AddRating(request.UserId, request.ProductId, request.Rating);
-            }
-            catch (Exception)
-            {
-                result = false;
-            }
-            return Json(result);
-        }
-
-    }
-}
-
-
-
-
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from "@angular/common/http"
-import { throwError, Observable, catchError, BehaviorSubject } from "rxjs"
-import { IRatingRequest } from '../../interfaces/ratingRequest';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class RatingService {
-
-  constructor(private http: HttpClient) { }
-
-  addRating(ratingRequest: IRatingRequest): Observable<boolean> {
-    return this.http.post<boolean>('https://localhost:7195/api/Rating/AddRating', ratingRequest)
-      .pipe(catchError(this.errorHandler));
+getProductImages(id: number) {
+    console.log("Fetching product images for ID:", id);
+    this._productService.getProductImages(id).subscribe(
+      (responseImagesData: any) => {
+        console.log("Product images received:", responseImagesData);
+        this.productImages = responseImagesData;
+      },
+      responseImagesError => {
+        this.errorMsg = responseImagesError;
+        console.error("Error fetching images:", this.errorMsg);
+      },
+      () => { console.log('GetProductImages method executed successfully'); }
+    );
   }
-
-
-  errorHandler(error: HttpErrorResponse) {
-    console.log(error);
-    return throwError(error.message || 'ERROR');
-  }
-
-
-
-}
-
-
-
-
-
