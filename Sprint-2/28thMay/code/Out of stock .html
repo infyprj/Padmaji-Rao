@@ -1,0 +1,549 @@
+<!-- Product Details Section -->
+<div class="col-md-6 product-detail-section">
+  <h1 class="product-title mb-3">{{ product.name }}</h1>
+  
+  <!-- Price Section -->
+  <div class="product-price mb-4">
+    <div class="price-container">
+      <h3 class="current-price mb-2">₹{{ product.price.toLocaleString() }}</h3>
+      <!-- Optional: Add original price for discount display -->
+      <!-- <span class="original-price">₹{{ product.originalPrice?.toLocaleString() }}</span> -->
+    </div>
+    
+    <!-- Stock Status -->
+    <div class="stock-status">
+      <div class="stock-indicator" *ngIf="product.quantity > 0" [ngClass]="getStockStatusClass()">
+        <i class="stock-icon" [ngClass]="getStockIconClass()"></i>
+        <span class="stock-text">
+          <span class="stock-label">{{ getStockStatusText() }}</span>
+          <span class="stock-count">({{ product.quantity }} available)</span>
+        </span>
+      </div>
+      
+      <!-- Out of Stock Status -->
+      <div class="stock-indicator out-of-stock" *ngIf="product.quantity === 0">
+        <i class="stock-icon fas fa-times-circle"></i>
+        <span class="stock-text">Out of Stock</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantity Selector -->
+  <div class="quantity-section mb-4" *ngIf="product.quantity > 0">
+    <label class="quantity-label">Quantity:</label>
+    <div class="quantity-selector">
+      <button class="qty-btn qty-decrease" 
+              type="button" 
+              (click)="decrementQuantity()"
+              [disabled]="quantity <= 1">
+        <i class="fas fa-minus"></i>
+      </button>
+      <input type="text" 
+             class="qty-input" 
+             [value]="quantity" 
+             readonly>
+      <button class="qty-btn qty-increase" 
+              type="button" 
+              (click)="incrementQuantity()"
+              [disabled]="quantity >= product.quantity">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+    <div class="quantity-info" *ngIf="quantity >= product.quantity">
+      <small class="text-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        Maximum available quantity selected
+      </small>
+    </div>
+  </div>
+
+  <!-- Product Actions -->
+  <div class="product-actions mb-4">
+    <!-- In Stock Actions -->
+    <div class="action-buttons" *ngIf="product.quantity > 0">
+      <button class="btn-primary-action" 
+              (click)="addToCart()"
+              [disabled]="quantity <= 0">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Add to Cart</span>
+      </button>
+      <button class="btn-secondary-action" 
+              (click)="addToWhishlist()">
+        <i class="fas fa-heart"></i>
+        <span>Add to Wishlist</span>
+      </button>
+    </div>
+    
+    <!-- Out of Stock Actions -->
+    <div class="out-of-stock-actions" *ngIf="product.quantity === 0">
+      <button class="btn-disabled" disabled>
+        <i class="fas fa-shopping-cart"></i>
+        <span>Out of Stock</span>
+      </button>
+      <button class="btn-notify" (click)="notifyWhenAvailable()">
+        <i class="fas fa-bell"></i>
+        <span>Notify When Available</span>
+      </button>
+    </div>
+    
+    <!-- Out of Stock Message -->
+    <div class="stock-message" *ngIf="product.quantity === 0">
+      <div class="alert-out-of-stock">
+        <i class="fas fa-info-circle"></i>
+        <div class="message-content">
+          <h5>Currently Unavailable</h5>
+          <p>This item is temporarily out of stock. Get notified when it's back!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Low Stock Warning -->
+  <div class="low-stock-warning" *ngIf="product.quantity > 0 && product.quantity <= 5">
+    <div class="alert-low-stock">
+      <i class="fas fa-clock"></i>
+      <span>Only {{ product.quantity }} left - order soon!</span>
+    </div>
+  </div>
+
+  <!-- Product Description -->
+  <div class="product-description mb-4">
+    <h4 class="description-title">Description</h4>
+    <div class="description-content">
+      <p>{{ product.description }}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Product Details Enhanced Styling */
+.product-detail-section {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Product Title */
+.product-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+
+/* Price Section */
+.product-price {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.price-container {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.current-price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d5a87;
+  margin: 0;
+}
+
+.original-price {
+  font-size: 20px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+/* Stock Status */
+.stock-status {
+  margin-top: 8px;
+}
+
+.stock-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.stock-indicator.in-stock {
+  background: #f0f9f0;
+  color: #0d7e22;
+  border: 1px solid #c3e6c3;
+}
+
+.stock-indicator.low-stock {
+  background: #fff8e1;
+  color: #f57c00;
+  border: 1px solid #ffcc80;
+}
+
+.stock-indicator.out-of-stock {
+  background: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+.stock-icon {
+  font-size: 14px;
+}
+
+.stock-text {
+  display: flex;
+  gap: 4px;
+}
+
+.stock-count {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Quantity Section */
+.quantity-section {
+  padding: 20px 0;
+}
+
+.quantity-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  width: fit-content;
+  background: white;
+  overflow: hidden;
+}
+
+.qty-btn {
+  background: #f8f9fa;
+  border: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: #e9ecef;
+  color: #333;
+}
+
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qty-input {
+  border: none;
+  width: 60px;
+  height: 44px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  background: white;
+}
+
+.quantity-info {
+  margin-top: 8px;
+}
+
+/* Product Actions */
+.product-actions {
+  padding: 24px 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.btn-primary-action {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  min-width: 180px;
+  justify-content: center;
+}
+
+.btn-primary-action:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.btn-secondary-action {
+  background: white;
+  color: #374151;
+  border: 2px solid #d1d5db;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.btn-secondary-action:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+  transform: translateY(-1px);
+}
+
+/* Out of Stock Actions */
+.out-of-stock-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.btn-disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 2px solid #e5e7eb;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: not-allowed;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.btn-notify {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  min-width: 180px;
+  justify-content: center;
+}
+
+.btn-notify:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Stock Messages */
+.stock-message {
+  margin-top: 16px;
+}
+
+.alert-out-of-stock {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.alert-out-of-stock i {
+  color: #ef4444;
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.message-content h5 {
+  margin: 0 0 8px 0;
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.message-content p {
+  margin: 0;
+  color: #7f1d1d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Low Stock Warning */
+.low-stock-warning {
+  margin-bottom: 20px;
+}
+
+.alert-low-stock {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.alert-low-stock i {
+  color: #f59e0b;
+}
+
+/* Product Description */
+.product-description {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 24px;
+}
+
+.description-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.description-content {
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-detail-section {
+    padding: 16px;
+  }
+  
+  .product-title {
+    font-size: 24px;
+  }
+  
+  .current-price {
+    font-size: 28px;
+  }
+  
+  .action-buttons,
+  .out-of-stock-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .btn-primary-action,
+  .btn-secondary-action,
+  .btn-disabled,
+  .btn-notify {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.low-stock-warning .alert-low-stock {
+  animation: pulse 2s infinite;
+}
+
+/* Accessibility */
+.btn-primary-action:focus,
+.btn-secondary-action:focus,
+.btn-notify:focus,
+.qty-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+</style>
+
+<!-- TypeScript Component Methods -->
+<script>
+// Add these methods to your component class
+export class ProductDetailsComponent {
+  
+  getStockStatusClass(): string {
+    if (this.product.quantity > 10) {
+      return 'in-stock';
+    } else if (this.product.quantity > 0) {
+      return 'low-stock';
+    }
+    return 'out-of-stock';
+  }
+  
+  getStockIconClass(): string {
+    if (this.product.quantity > 10) {
+      return 'fas fa-check-circle';
+    } else if (this.product.quantity > 0) {
+      return 'fas fa-exclamation-triangle';
+    }
+    return 'fas fa-times-circle';
+  }
+  
+  getStockStatusText(): string {
+    if (this.product.quantity > 10) {
+      return 'In Stock';
+    } else if (this.product.quantity > 0) {
+      return 'Low Stock';
+    }
+    return 'Out of Stock';
+  }
+  
+  notifyWhenAvailable(): void {
+    // Implement notification functionality
+    console.log('User requested notification when product is available');
+    // You can show a modal to collect email or add to notification list
+  }
+  
+  incrementQuantity(): void {
+    if (this.quantity < this.product.quantity) {
+      this.quantity++;
+    }
+  }
+  
+  decrementQuantity(): void {
+    if (this.quantity > 1) {
+      this.quantity--;
+    }
+  }
+}
+</script>
