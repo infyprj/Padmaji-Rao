@@ -1,95 +1,109 @@
-<!-- Address Modal -->
-  <div class="modal-overlay" *ngIf="showAddressModal" (click)="closeAddressModal()">
-    <div class="modal-content address-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Edit Address' : 'Add New Address' }}</h3>
-        <button class="btn-close" (click)="closeAddressModal()">
-          <i class="icon-close"></i>
-        </button>
-      </div>
+ #region AddRating - Adds or updates a rating for a product by user
+        public bool AddRating(int userId, int productId, int rating)
+        {
+            try
+            {
+                var existingRating = context.Ratings.FirstOrDefault(r => r.UserId == userId && r.ProductId == productId);
 
-      <form class="address-form" (ngSubmit)="saveAddress()">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="name">Full Name *</label>
-            <input type="text"
-                   id="name"
-                   [(ngModel)]="addressForm.name"
-                   name="name"
-                   required
-                   class="form-input">
-          </div>
-          <div class="form-group">
-            <label for="phone">Phone Number *</label>
-            <input type="tel"
-                   id="phone"
-                   [(ngModel)]="addressForm.phoneNumber"
-                   name="phone"
-                   required
-                   class="form-input">
-          </div>
-        </div>
+                if (existingRating != null)
+                {
+                    // Update existing rating
+                    existingRating.RatingValue = rating;
+                }
+                else
+                {
+                    // Add new rating
+                    var newRating = new Rating
+                    {
+                        UserId = userId,
+                        ProductId = productId,
+                        RatingValue = rating
+                    };
+                    context.Ratings.Add(newRating);
+                }
 
-        <div class="form-group">
-          <label for="address">Address *</label>
-          <textarea id="address"
-                    [(ngModel)]="addressForm.addressLine"
-                    name="address"
-                    required
-                    class="form-textarea"
-                    rows="3"></textarea>
-        </div>
+                context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+        #endregion
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="city">City *</label>
-            <input type="text"
-                   id="city"
-                   [(ngModel)]="addressForm.city"
-                   name="city"
-                   required
-                   class="form-input">
-          </div>
-          <div class="form-group">
-            <label for="state">State *</label>
-            <input type="text"
-                   id="state"
-                   [(ngModel)]="addressForm.state"
-                   name="state"
-                   required
-                   class="form-input">
-          </div>
-        </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="postalCode">Postal Code *</label>
-            <input type="text"
-                   id="postalCode"
-                   [(ngModel)]="addressForm.postalCode"
-                   name="postalCode"
-                   required
-                   class="form-input">
-          </div>
-          <div class="form-group">
-            <label for="country">Country *</label>
-            <input type="text"
-                   id="country"
-                   [(ngModel)]="addressForm.country"
-                   name="country"
-                   required
-                   class="form-input">
-          </div>
-        </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-cancel" (click)="closeAddressModal()">
-            Cancel
-          </button>
-          <button type="submit" class="btn-save">
-            {{ isEditMode ? 'Update Address' : 'Save Address' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+
+
+using Infosys.Shop3D.DataAccessLayer;
+using Infosys.Shop3D.DataAccessLayer.Models;
+using Infosys.Shop3D.WebServices.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Infosys.Shop3D.WebServices.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class RatingController : Controller
+    {
+        public Shop3DRepository repository;
+        public RatingController(Shop3DRepository repository)
+        {
+            this.repository = repository;
+        }
+
+        [HttpPost]
+        public JsonResult AddRating([FromBody] Models.RatingRequest request)
+        {
+            bool result = false;
+            try
+            {
+                result = repository.AddRating(request.UserId, request.ProductId, request.Rating);
+            }
+            catch (Exception)
+            {
+                result = false;
+            }
+            return Json(result);
+        }
+
+    }
+}
+
+
+
+
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from "@angular/common/http"
+import { throwError, Observable, catchError, BehaviorSubject } from "rxjs"
+import { IRatingRequest } from '../../interfaces/ratingRequest';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RatingService {
+
+  constructor(private http: HttpClient) { }
+
+  addRating(ratingRequest: IRatingRequest): Observable<boolean> {
+    return this.http.post<boolean>('https://localhost:7195/api/Rating/AddRating', ratingRequest)
+      .pipe(catchError(this.errorHandler));
+  }
+
+
+  errorHandler(error: HttpErrorResponse) {
+    console.log(error);
+    return throwError(error.message || 'ERROR');
+  }
+
+
+
+}
+
+
+
+
+
