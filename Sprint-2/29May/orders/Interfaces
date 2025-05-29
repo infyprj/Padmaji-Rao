@@ -1,0 +1,27 @@
+export interface IOrder {
+  orderId: number;
+  userId: number;
+  orderDate: Date;
+  totalAmount: number;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingPostalCode: string;
+  shippingCountry: string;
+  name: string;
+  phoneNumber: string;
+}
+
+
+
+export interface IOrderItem {
+  orderItemId: number;
+  orderId: number;
+  productId: number;
+  productName: string;
+  thumbnailUrl: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+
